@@ -1,0 +1,230 @@
+﻿@page "/processSalesTrans"
+
+<EditForm Model="@_viewRequestModel" OnValidSubmit="@ProcessTrans">
+    @*  <DataAnnotationsValidator />*@
+    <ObjectGraphDataAnnotationsValidator></ObjectGraphDataAnnotationsValidator>
+    <ValidationSummary />
+
+
+
+
+
+    @*<div class="mb-3">
+        <div class="card" style="width: 100%">
+        <div class="card-body">
+        <div class="container">
+        <div class="row">
+        <div class="col-12 col-md-4">
+
+        <div class="mb-3">
+        <label for="txtMarchantId" class="form-label">Merchant ID</label>
+        <input @bind="_viewRequestModel.Outlet.MerchantID" type="text" class="form-control" id="txtMarchantId" placeholder="E.g. 192837645 " required>
+        </div>
+        </div>
+        <div class="col-12 col-md-4">
+        <div class="mb-3">
+        <label for="txtStoreID" class="form-label">Store ID</label>
+        <input @bind="_viewRequestModel.Outlet.StoreID" type="text" class="form-control" id="txtStoreID" placeholder="E.g. 0001" required>
+        </div>
+        </div>
+        <div class="col-12 col-md-4">
+
+        <div class="mb-3">
+        <label for="txtTerminalID" class="form-label">Terminal ID</label>
+        <input @bind="_viewRequestModel.Outlet.TerminalID" type="text" class="form-control" id="txtTerminalID" placeholder="E.g. 0001" required>
+        </div>
+        </div>
+        </div>
+        </div>
+
+
+        </div>
+        </div>
+        </div>*@
+
+
+    <div class="mb-3">
+        <div class="card " style="width: 100%">
+            <div class="card-body">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-12 col-md-4">
+                            <div class="mb-3">
+                                <label for="txtAmountId" class="form-label">Amount</label>
+                                <input @bind="_viewRequestModel.Amount" type="text" class="form-control" id="txtAmountId" placeholder="Required Amount" required>
+                            </div>
+                        </div>
+                        @* <div class="col-12 col-md-4">
+                            <div class="mb-3">
+                            <label for="txtPaymentMethod" class="form-label">Payment Method</label>
+                            <input @bind="_viewRequestModel.PaymentMethod" type="text" class="form-control" id="txtPaymentMethod" placeholder="E.g. Card " required>
+                            </div>
+                            </div>*@
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="mb-3">
+        <div class="card" style="width: 100%">
+            <div class="card-body">
+                <div class="container">
+
+                    <div class="row">
+
+
+                        <div class="col-12 col-md-4">
+
+                            <div class="mb-3">
+                                <label for="txtCardNumber" class="form-label">Card Number</label>
+                                <input @bind="_viewRequestModel.Card.CardNumber" type="text" class="form-control" id="txtCardNumber" placeholder="E.g. 4111111111111111" required>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-md-4">
+
+                            <div class="mb-3">
+                                <label for="txtExpiration" class="form-label">Expiration</label>
+                                <input @bind="_viewRequestModel.Card.Expiration" type="text" class="form-control" id="txtExpiration" placeholder="E.g. 04/25" required>
+                            </div>
+                        </div>
+
+
+                        <div class="col-12 col-md-4">
+
+                            <div class="mb-3">
+                                <label for="txtCVN" class="form-label">CVN</label>
+                                <input @bind="_viewRequestModel.Card.CVN" type="text" class="form-control" id="txtCVN" placeholder="E.g. 123" required>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="row">
+
+                        @*<div class="col-12 col-md-4">
+
+                            <div class="mb-3">
+                            <label for="txtEntryMode" class="form-label">Entry Mode</label>
+                            <input @bind="_viewRequestModel.Card.EntryMode" type="text" class="form-control" id="txtEntryMode" placeholder="E.g. key " required>
+                            </div>
+                            </div>*@
+
+                        <div class="col-12 col-md-4">
+
+                            <div class="mb-3">
+                                <label for="txtCardHolderName" class="form-label">Card Holder Name</label>
+                                <input @bind="_viewRequestModel.Card.CardHolderName" type="text" class="form-control" id="txtCardHolderName" placeholder="E.g. FirstName LastName ">
+                            </div>
+                        </div>
+
+
+                        <div class="col-12 col-md-4">
+
+                            <div class="mb-3">
+                                <label for="txtCardHolderEmail" class="form-label">Card Holder Email</label>
+                                <input @bind="_viewRequestModel.Card.CardHolderEmail" type="text" class="form-control" id="txtCardHolderEmail" placeholder="E.g. tester@testing.com ">
+                            </div>
+                        </div>
+
+                    </div>
+
+
+                    <div class="row">
+                    </div>
+
+                    @* <div class="row">
+                        <div class="col-12 col-md-4">
+
+                        <div class="mb-3">
+                        <label for="txtIsCardDataEncrypted" class="form-label">Is Card DataEncrypted</label>
+                        <input @bind="_viewRequestModel.Card.IsCardDataEncrypted" type="text" class="form-control" id="txtIsCardDataEncrypted" placeholder="E.g. false ">
+                        </div>
+                        </div>
+                        <div class="col-12 col-md-4">
+                        <div class="mb-3">
+                        <label for="txtIsEMVCapableDevice" class="form-label">Is EMV Capable Device</label>
+                        <input @bind="_viewRequestModel.Card.IsEMVCapableDevice" type="text" class="form-control" id="txtIsEMVCapableDevice" placeholder="E.g. false ">
+                        </div>
+                        </div>
+                        </div>*@
+
+
+                </div>
+
+
+            </div>
+        </div>
+    </div>
+
+
+
+
+    <div class="mb-3">
+        <button type="submit" class="btn btn-outline-success">Submit</button>
+    </div>
+
+
+    <div class="mb-3">
+
+
+
+
+        @* <textarea readonly="" class="form-control" id="exampleFormControlTextarea1" rows="3">
+            @_response
+            </textarea>
+        *@
+
+
+
+
+
+    </div>
+</EditForm>
+
+
+
+@if (_responseModel == null && _errorModel == null)
+{
+    
+
+}
+else
+{
+    if (_responseModel == null && _errorModel != null)
+    {
+        <div class="alert alert-danger" role="alert">
+            <h4 class="alert-heading">Response Code</h4>
+            <p>
+                @_errorModel
+            </p>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-success" role="alert">
+            <h4 class="alert-heading">Response Code</h4>
+            <p>
+                @if (_responseModel != null)
+                {
+                    @_responseModel.ResponseCode@:</p>
+                    @:<hr>
+                    <h4 class="alert-heading">Response Message</h4>
+                    <p>@_responseModel.ResponseMessage</p>
+                    @:<hr>
+                    <h4 class="alert-heading">Authorization Number</h4>
+                    @:<p>@_responseModel.AuthorizationNumber
+                }
+            </p>
+        </div>
+    }
+}
+
+
+
+
+
+
