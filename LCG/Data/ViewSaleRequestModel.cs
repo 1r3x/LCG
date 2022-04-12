@@ -18,6 +18,7 @@ namespace LCG.Data
         [ValidateComplexType]
         public Card Card { get; set; } = new Card();
         public BillingAddress BillingAddress { get; set; } = new BillingAddress();
+        [ValidateComplexType]
         public Patient Patient { get; set; } = new Patient();
     }
 
@@ -59,8 +60,11 @@ namespace LCG.Data
 
     public class Patient
     {
+        [Required]
         public string AccountNumber { get; set; }
+        [Required]
         public string FirstName { get; set; }
+        [Required]
         public string LastName { get; set; }
     }
 }

@@ -15,16 +15,22 @@ namespace LCG.Pages.SalesTrans
     public partial class ProcessSalesTrans
     {
         [Inject] private IProcessSaleTransactions Api { get; set; }
-        private readonly ViewSaleRequestModel _viewRequestModel = new();
+        private ViewSaleRequestModel _viewRequestModel = new();
         //private string _response;
         private ViewSaleResponseModel _responseModel;
         private string _errorModel;
+        private int _loadingBar;
+        private decimal _tempAmount;
+        private bool _isSubmitting;
 
 
         private async Task ProcessTrans()
         {
             _responseModel = null;
             _errorModel = null;
+            _loadingBar = 0;
+            _tempAmount = 0;
+            _isSubmitting = true;
             var saleRequestModel = new SaleRequestModel()
             {
                 Outlet = new ApiAccessLibrary.ApiModels.Outlet()
@@ -56,6 +62,7 @@ namespace LCG.Pages.SalesTrans
             };
             try
             {
+                _loadingBar = 1;
                 var resultVerify = await Api.PostProcessSalesTransactionAsync(saleRequestModel);
                 if (resultVerify.Contains("FieldErrors"))
                 {
@@ -63,9 +70,13 @@ namespace LCG.Pages.SalesTrans
                 }
                 else
                 {
+                    _tempAmount = _viewRequestModel.Amount;
                     _responseModel = new ViewSaleResponseModel(resultVerify);
+                    _viewRequestModel = new ViewSaleRequestModel();
                 }
-               
+
+                _loadingBar = 0;
+                _isSubmitting = false;
 
             }
             catch (Exception e)
