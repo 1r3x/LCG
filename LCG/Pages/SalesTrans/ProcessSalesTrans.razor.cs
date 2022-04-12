@@ -23,6 +23,8 @@ namespace LCG.Pages.SalesTrans
 
         private async Task ProcessTrans()
         {
+            _responseModel = null;
+            _errorModel = null;
             var saleRequestModel = new SaleRequestModel()
             {
                 Outlet = new ApiAccessLibrary.ApiModels.Outlet()
