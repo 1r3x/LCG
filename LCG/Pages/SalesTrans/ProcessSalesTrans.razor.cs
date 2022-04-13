@@ -36,7 +36,7 @@ namespace LCG.Pages.SalesTrans
                 Outlet = new ApiAccessLibrary.ApiModels.Outlet()
                 {
                     //MerchantID = _viewRequestModel.Outlet.MerchantID,
-                    MerchantID = "192837645 ",
+                    MerchantID = "192837645",
                     //StoreID = _viewRequestModel.Outlet.StoreID,
                     StoreID = "0001",
                     //TerminalID = _viewRequestModel.Outlet.TerminalID
@@ -87,9 +87,6 @@ namespace LCG.Pages.SalesTrans
 
 
         }
-
-
-
 
     }
 }

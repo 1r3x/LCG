@@ -219,7 +219,7 @@
 
 <div class="alert alert-primary d-flex align-items-center" role="alert">
     <svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Info:"><use xlink:href="#info-fill" /></svg>
-    <span class="text-nowrap">I (Card Holder) AGREE TO PAY THE ABOVE AMOUNT ACCORDING TO MY CARD HOLDER AGREEMENT ON BEHALF OF (Patient Name)</span>
+    <span class="text-nowrap">&nbsp;I (Card Holder) AGREE TO PAY THE ABOVE AMOUNT ACCORDING TO MY CARD HOLDER AGREEMENT ON BEHALF OF (Patient Name).</span>
 </div>
 
 
@@ -280,22 +280,45 @@ else
     }
     else
     {
-        <div class="alert alert-success" role="alert">
-            <h4 class="alert-heading">Response @_responseModel.ResponseCode</h4>
-            <p>
-                InstaMed CC Processed for $  @_tempAmount &nbsp;
-                @if (_responseModel != null)
-                {
-                    @_responseModel.ResponseMessage
-                }
-                &nbsp; Auth #:
-                @if (_responseModel != null)
-                {
-                    @_responseModel.AuthorizationNumber
-                }
+        if (_responseModel.ResponseCode=="000")
+        {
+            <div class="alert alert-success" role="alert">
+                <h4 class="alert-heading">Response @_responseModel.ResponseCode</h4>
+                <p>
+                    InstaMed CC Processed for $  @_tempAmount &nbsp;
+                    @if (_responseModel != null)
+                    {
+                        @_responseModel.ResponseMessage
+                    }
+                    &nbsp; Auth #:
+                    @if (_responseModel != null)
+                    {
+                        @_responseModel.AuthorizationNumber
+                    }
 
-            </p>
-        </div>
+                </p>
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-danger" role="alert">
+                <h4 class="alert-heading">Response @_responseModel.ResponseCode</h4>
+                <p>
+                    InstaMed CC Processed for $  @_tempAmount &nbsp;
+                    @if (_responseModel != null)
+                    {
+                        @_responseModel.ResponseMessage
+                    }
+                    &nbsp; Auth #:
+                    @if (_responseModel != null)
+                    {
+                        @_responseModel.AuthorizationNumber
+                    }
+
+                </p>
+            </div>
+        }
+       
     }
 }
 
