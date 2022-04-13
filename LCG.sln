@@ -1,13 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.1.32328.378
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.32228.343
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LCG", "LCG\LCG.csproj", "{70154496-D0AA-4500-A0E5-11E025C04640}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ApiAccessLibrary", "ApiAccessLibrary\ApiAccessLibrary.csproj", "{35052C0C-79E3-429F-AD8B-F8491220C8EA}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataAccessLibrary", "DataAccessLibrary\DataAccessLibrary.csproj", "{9DDF7727-D361-4657-BF2E-8CF48A5698FC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -23,10 +21,6 @@ Global
 		{35052C0C-79E3-429F-AD8B-F8491220C8EA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{35052C0C-79E3-429F-AD8B-F8491220C8EA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{35052C0C-79E3-429F-AD8B-F8491220C8EA}.Release|Any CPU.Build.0 = Release|Any CPU
-		{9DDF7727-D361-4657-BF2E-8CF48A5698FC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{9DDF7727-D361-4657-BF2E-8CF48A5698FC}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{9DDF7727-D361-4657-BF2E-8CF48A5698FC}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{9DDF7727-D361-4657-BF2E-8CF48A5698FC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
