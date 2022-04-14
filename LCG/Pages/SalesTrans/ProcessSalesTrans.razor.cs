@@ -88,5 +88,15 @@ namespace LCG.Pages.SalesTrans
 
         }
 
+        private void OperationPutSlash()
+        {
+            if (_viewRequestModel.Card.Expiration is not { Length: 4 }) return;
+            var firstHalf = _viewRequestModel.Card.Expiration[..2];
+            var secondHalf = _viewRequestModel.Card.Expiration.Substring(2, 2);
+            var newString = firstHalf + "/" + secondHalf;
+            _viewRequestModel.Card.Expiration = newString;
+
+        }
+
     }
 }
