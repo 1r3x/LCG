@@ -1,9 +1,7 @@
-﻿using System;
-using System.Net.Http;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using ApiAccessLibrary.ApiModels;
 
-namespace ApiAccessLibrary
+namespace ApiAccessLibrary.Interfaces
 {
     public interface IProcessSaleTransactions
     {

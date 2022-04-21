@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using ApiAccessLibrary;
+using ApiAccessLibrary.Interfaces;
 using Microsoft.AspNetCore.Components;
 using Outlet = LCG.Data.Outlet;
 
@@ -16,7 +17,6 @@ namespace LCG.Pages.SalesTrans
     {
         [Inject] private IProcessSaleTransactions Api { get; set; }
         private ViewSaleRequestModel _viewRequestModel = new();
-        //private string _response;
         private ViewSaleResponseModel _responseModel;
         private string _errorModel;
         private int _loadingBar;
@@ -58,6 +58,12 @@ namespace LCG.Pages.SalesTrans
                     IsCardDataEncrypted = false,
                     //IsEMVCapableDevice = _viewRequestModel.Card.IsEMVCapableDevice,
                     IsEMVCapableDevice = false,
+                },
+                Patient = new ApiAccessLibrary.ApiModels.Patient()
+                {
+                    AccountNumber = _viewRequestModel.Patient.AccountNumber,
+                    FirstName = _viewRequestModel.Patient.FirstName,
+                    LastName = _viewRequestModel.Patient.LastName
                 }
             };
             try
