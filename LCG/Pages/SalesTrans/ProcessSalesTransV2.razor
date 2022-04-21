@@ -1,0 +1,318 @@
+﻿@page "/v2"
+@page "/v2/{DebtorAcct}"
+
+
+<EditForm Model="@_viewRequestModel" OnValidSubmit="@ProcessTrans">
+    @*  <DataAnnotationsValidator />*@
+    <ObjectGraphDataAnnotationsValidator></ObjectGraphDataAnnotationsValidator>
+
+
+
+
+    @*<div class="mb-3">
+        <div class="card" style="width: 100%">
+        <div class="card-body">
+        <div class="container">
+        <div class="row">
+        <div class="col-12 col-md-4">
+
+        <div class="mb-3">
+        <label for="txtMarchantId" class="form-label">Merchant ID</label>
+        <input @bind="_viewRequestModel.Outlet.MerchantID" type="text" class="form-control" id="txtMarchantId" placeholder="E.g. 192837645 " required>
+        </div>
+        </div>
+        <div class="col-12 col-md-4">
+        <div class="mb-3">
+        <label for="txtStoreID" class="form-label">Store ID</label>
+        <input @bind="_viewRequestModel.Outlet.StoreID" type="text" class="form-control" id="txtStoreID" placeholder="E.g. 0001" required>
+        </div>
+        </div>
+        <div class="col-12 col-md-4">
+
+        <div class="mb-3">
+        <label for="txtTerminalID" class="form-label">Terminal ID</label>
+        <input @bind="_viewRequestModel.Outlet.TerminalID" type="text" class="form-control" id="txtTerminalID" placeholder="E.g. 0001" required>
+        </div>
+        </div>
+        </div>
+        </div>
+
+
+        </div>
+        </div>
+        </div>*@
+
+
+    <div class="mb-3">
+        <div class="card " style="width: 100%">
+            <div class="card-body">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-12 col-md-4">
+                            <div class="mb-3">
+                                <label for="txtAmountId" class="form-label">Payment Amount</label>
+                                <input @bind="_viewRequestModel.Amount" type="decimal" class="form-control" id="txtAmountId" placeholder="Required Amount" required>
+                            </div>
+                        </div>
+
+                        @* <div class="col-12 col-md-4">
+                            <div class="mb-3">
+                            <label for="txtPaymentMethod" class="form-label">Payment Method</label>
+                            <input @bind="_viewRequestModel.PaymentMethod" type="text" class="form-control" id="txtPaymentMethod" placeholder="E.g. Card " required>
+                            </div>
+                            </div>*@
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="mb-3">
+        <div class="card" style="width: 100%">
+            <div class="card-body">
+                <div class="container">
+
+                    <div class="row">
+
+
+                        <div class="col-12 col-md-4">
+
+                            <div class="mb-3">
+                                <label for="txtCardNumber" class="form-label">Card Number</label>
+                                <input @bind="_viewRequestModel.Card.CardNumber" type="text" class="form-control" id="txtCardNumber" placeholder="E.g. 4111111111111111" required>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-md-4">
+
+                            <div class="mb-3">
+                                <label for="txtExpiration" class="form-label">Expiration</label>
+                                <input @bind="_viewRequestModel.Card.Expiration" maxlength="4" minLength="4" @onblur="OperationPutSlash" type="text" class="form-control" id="txtExpiration" placeholder="E.g. 0425" required>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-md-4">
+
+                            <div class="mb-3">
+                                <label for="txtCVN" class="form-label">CVN</label>
+                                <input @bind="_viewRequestModel.Card.CVN" type="text" class="form-control" id="txtCVN" placeholder="E.g. 123" required>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="row">
+
+                        @*<div class="col-12 col-md-4">
+
+                            <div class="mb-3">
+                            <label for="txtEntryMode" class="form-label">Entry Mode</label>
+                            <input @bind="_viewRequestModel.Card.EntryMode" type="text" class="form-control" id="txtEntryMode" placeholder="E.g. key " required>
+                            </div>
+                            </div>*@
+
+                        <div class="col-12 col-md-4">
+
+                            <div class="mb-3">
+                                <label for="txtCardHolderName" class="form-label">Card Holder Name</label>
+                                <input @bind="_viewRequestModel.Card.CardHolderName" type="text" class="form-control" id="txtCardHolderName" placeholder="E.g. FirstName LastName ">
+                            </div>
+                        </div>
+
+
+                        <div class="col-12 col-md-4">
+
+                            <div class="mb-3">
+                                <label for="txtCardHolderEmail" class="form-label">Card Holder Email</label>
+                                <input @bind="_viewRequestModel.Card.CardHolderEmail" type="text" class="form-control" id="txtCardHolderEmail" placeholder="E.g. tester@testing.com ">
+                            </div>
+                        </div>
+
+                    </div>
+
+                    @* <div class="row">
+                        <div class="col-12 col-md-4">
+
+                        <div class="mb-3">
+                        <label for="txtIsCardDataEncrypted" class="form-label">Is Card DataEncrypted</label>
+                        <input @bind="_viewRequestModel.Card.IsCardDataEncrypted" type="text" class="form-control" id="txtIsCardDataEncrypted" placeholder="E.g. false ">
+                        </div>
+                        </div>
+                        <div class="col-12 col-md-4">
+                        <div class="mb-3">
+                        <label for="txtIsEMVCapableDevice" class="form-label">Is EMV Capable Device</label>
+                        <input @bind="_viewRequestModel.Card.IsEMVCapableDevice" type="text" class="form-control" id="txtIsEMVCapableDevice" placeholder="E.g. false ">
+                        </div>
+                        </div>
+                        </div>*@
+
+
+                </div>
+
+
+            </div>
+        </div>
+    </div>
+
+
+    <div class="mb-3">
+        <div class="card" style="width: 100%">
+            <div class="card-body">
+                <div class="container">
+
+                    <div class="row">
+
+
+                        <div class="col-12 col-md-4">
+
+                            <div class="mb-3">
+                                <label for="txtPatientAccountNumber" class="form-label">Patient Account Number</label>
+                                <input @bind="_viewRequestModel.Patient.AccountNumber" type="text" class="form-control" id="txtPatientAccountNumber" placeholder="E.g. PID123456" required>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-md-4">
+
+                            <div class="mb-3">
+                                <label for="txtPatientFirstName" class="form-label">First Name</label>
+                                <input @bind="_viewRequestModel.Patient.FirstName" type="text" class="form-control" id="txtPatientFirstName" placeholder="E.g. PatFirst" required>
+                            </div>
+                        </div>
+
+
+                        <div class="col-12 col-md-4">
+
+                            <div class="mb-3">
+                                <label for="txtPatientLastName" class="form-label">Last Name</label>
+                                <input @bind="_viewRequestModel.Patient.LastName" type="text" class="form-control" id="txtPatientLastName" placeholder="E.g. PatLast" required>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+
+    <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+        <symbol id="check-circle-fill" fill="currentColor" viewBox="0 0 16 16">
+            <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z" />
+        </symbol>
+        <symbol id="info-fill" fill="currentColor" viewBox="0 0 16 16">
+            <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z" />
+        </symbol>
+        <symbol id="exclamation-triangle-fill" fill="currentColor" viewBox="0 0 16 16">
+            <path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z" />
+        </symbol>
+    </svg>
+
+
+    <div class="alert alert-primary d-flex align-items-center" role="alert">
+        <svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Info:"><use xlink:href="#info-fill" /></svg>
+        <span class="text-nowrap">&nbsp;I (Card Holder) AGREE TO PAY THE ABOVE AMOUNT ACCORDING TO MY CARD HOLDER AGREEMENT ON BEHALF OF (Patient Name).</span>
+    </div>
+
+
+    <div class="mb-3">
+        <button type="submit" disabled=@_isSubmitting class="btn btn-outline-success">Submit</button>
+    </div>
+
+
+    <ValidationSummary />
+
+</EditForm>
+
+
+
+
+@if (_responseModel == null && _errorModel == null)
+{
+    if (_loadingBar == 1)
+    {
+        <div class="spinner-grow text-primary" role="status">
+            <span class="sr-only">Loading...</span>
+        </div>
+        <div class="spinner-grow text-secondary" role="status">
+            <span class="sr-only">Loading...</span>
+        </div>
+        <div class="spinner-grow text-success" role="status">
+            <span class="sr-only">Loading...</span>
+        </div>
+        <div class="spinner-grow text-danger" role="status">
+            <span class="sr-only">Loading...</span>
+        </div>
+        <div class="spinner-grow text-warning" role="status">
+            <span class="sr-only">Loading...</span>
+        </div>
+        <div class="spinner-grow text-info" role="status">
+            <span class="sr-only">Loading...</span>
+        </div>
+        <div class="spinner-grow text-light" role="status">
+            <span class="sr-only">Loading...</span>
+        </div>
+        <div class="spinner-grow text-dark" role="status">
+            <span class="sr-only">Loading...</span>
+        </div>
+    }
+
+
+}
+else
+{
+    if (_responseModel == null && _errorModel != null)
+    {
+        <div class="alert alert-danger" role="alert">
+            <h4 class="alert-heading">Error Response</h4>
+            <p>
+                @_errorModel
+            </p>
+        </div>
+    }
+    else
+    {
+        if (_responseModel.ResponseCode == "000")
+        {
+            <div class="alert alert-success" role="alert">
+                <h4 class="alert-heading">Response @_responseModel.ResponseCode</h4>
+                <p>
+                    InstaMed CC Processed for $  @_tempAmount &nbsp;
+                    @if (_responseModel != null)
+                    {
+                        @_responseModel.ResponseMessage
+                    }
+                    &nbsp; Auth #:
+                    @if (_responseModel != null)
+                    {
+                        @_responseModel.AuthorizationNumber
+                    }
+
+                </p>
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-danger" role="alert">
+                <h4 class="alert-heading">Response @_responseModel.ResponseCode</h4>
+                <p>
+                    InstaMed CC Processed for $  @_tempAmount &nbsp;
+                    @if (_responseModel != null)
+                    {
+                        @_responseModel.ResponseMessage
+                    }
+                    &nbsp; Auth #:
+                    @if (_responseModel != null)
+                    {
+                        @_responseModel.AuthorizationNumber
+                    }
+
+                </p>
+            </div>
+        }
+
+    }
+}

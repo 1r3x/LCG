@@ -20,6 +20,7 @@ namespace LCG.Data
         public BillingAddress BillingAddress { get; set; } = new BillingAddress();
         [ValidateComplexType]
         public Patient Patient { get; set; } = new Patient();
+
     }
 
 
