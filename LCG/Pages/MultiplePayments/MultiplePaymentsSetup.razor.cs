@@ -34,7 +34,7 @@ namespace LCG.Pages.MultiplePayments
             {
                 _viewRequestModel.Patient.FirstName = patientInfo.FirstName;
                 _viewRequestModel.Patient.LastName = patientInfo.LastName;
-                _viewRequestModel.Patient.AccountNumber = debtorAccountInfoT.SuppliedAcct;
+                _viewRequestModel.Patient.AccountNumber = debtorAccountInfoT.SuppliedAcct.TrimStart(new[] { '0' });//for leading zero;
                 _viewRequestModel.Balance = debtorAccountInfoT.Balance;
                 _debtorAcctTBalance = debtorAccountInfoT.Balance;
 
@@ -172,10 +172,17 @@ namespace LCG.Pages.MultiplePayments
                 }
 
                 string noteText = null;
-                if (@_responseModel != null)
+                if (@_responseModel != null && _responseModel.ResponseCode == "000")
                 {
-                    noteText = "InstaMed CC Authorize for $" + _tempAmount + " " + @_responseModel.ResponseMessage +
-                               " Auth #:" + @_responseModel.AuthorizationNumber;
+                    noteText = "INSTAMED CC APPROVED FOR $" + _tempAmount + " " + @_responseModel.ResponseMessage.ToUpper() +
+                               " AUTH #:" + @_responseModel.AuthorizationNumber;
+                }
+                else
+                {
+                    if (@_responseModel != null)
+                        noteText = "INSTAMED CC DECLINED FOR $" + _tempAmount + " " +
+                                   @_responseModel.ResponseMessage.ToUpper() +
+                                   " AUTH #:" + @_responseModel.AuthorizationNumber;
                 }
 
                 await AddNotes.Notes(DebtorAcct, 31950, "RA", noteText, "N", null, "t");

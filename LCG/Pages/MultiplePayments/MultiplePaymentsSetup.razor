@@ -288,12 +288,12 @@ else
     }
     else
     {
-        if (_responseModel.ResponseCode == "000")
+        if (_responseModel != null && _responseModel.ResponseCode == "000")
         {
             <div class="alert alert-success" role="alert">
                 <h4 class="alert-heading">Response @_responseModel.ResponseCode</h4>
                 <p>
-                    InstaMed CC Processed for $  @_tempAmount &nbsp;
+                    InstaMed CC Approved for $  @_tempAmount &nbsp;
                     @if (_responseModel != null)
                     {
                         @_responseModel.ResponseMessage
@@ -312,7 +312,7 @@ else
             <div class="alert alert-danger" role="alert">
                 <h4 class="alert-heading">Response @_responseModel.ResponseCode</h4>
                 <p>
-                    InstaMed CC Processed for $  @_tempAmount &nbsp;
+                    InstaMed CC Declined for $  @_tempAmount &nbsp;
                     @if (_responseModel != null)
                     {
                         @_responseModel.ResponseMessage
