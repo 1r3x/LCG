@@ -26,8 +26,8 @@ namespace LCG.Pages.SalesTrans
         private bool _isSubmitting;
         protected override async Task OnInitializedAsync()
         {
-            var patientInfo = await PopulateData.GetPatientMasterData(DebtorAcct, "t");
-            var debtorAccountInfoT = await PopulateData.GetDebtorAccountInfoT(DebtorAcct, "t");
+            var patientInfo = await PopulateData.GetPatientMasterData(DebtorAcct, "PO");//PO for prod_old & T is for test_db
+            var debtorAccountInfoT = await PopulateData.GetDebtorAccountInfoT(DebtorAcct, "PO");//PO for prod_old & T is for test_db
             if (patientInfo != null && debtorAccountInfoT != null)
             {
                 _viewRequestModel.Patient.FirstName = patientInfo.FirstName;
@@ -94,13 +94,20 @@ namespace LCG.Pages.SalesTrans
                 }
 
                 string noteText = null;
-                if (@_responseModel != null)
+                if (@_responseModel != null && _responseModel.ResponseCode=="000")
                 {
-                    noteText = "InstaMed CC Processed for $" + _tempAmount + " " + @_responseModel.ResponseMessage +
-                                  " Auth #:" + @_responseModel.AuthorizationNumber;
+                    noteText = "INSTAMED CC APPROVED FOR $" + _tempAmount + " " + @_responseModel.ResponseMessage.ToUpper() +
+                                  " AUTH #:" + @_responseModel.AuthorizationNumber;
+                }
+                else
+                {
+                    if (@_responseModel != null)
+                        noteText = "INSTAMED CC DECLINED FOR $" + _tempAmount + " " +
+                                   @_responseModel.ResponseMessage.ToUpper() +
+                                   " AUTH #:" + @_responseModel.AuthorizationNumber;
                 }
 
-                await AddNotes.Notes(DebtorAcct, 31950, "RA", noteText, "N", null, "t");
+                await AddNotes.Notes(DebtorAcct, 31950, "RA", noteText, "N", null, "PO");//PO for prod_old & T is for test_db
                 _loadingBar = 0;
                 _isSubmitting = false;
 

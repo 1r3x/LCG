@@ -40,7 +40,10 @@ namespace LCG
             //this context is used for test environment 
             services.AddDbContext<DbContextForTest>(
                 options => options.UseSqlServer("name=ConnectionStrings:TestEnvironmentConnection"));
-            
+            //this context is used for prod_old environment 
+            services.AddDbContext<DbContextForProdOld>(
+                options => options.UseSqlServer("name=ConnectionStrings:ProdOldConnection"));
+
             //DI
             services.AddHttpClient<IProcessSaleTransactions, ProcessSaleTransactions>();
             services.AddHttpClient<IProcessCardAuthorization, ProcessCardAuthorization>();

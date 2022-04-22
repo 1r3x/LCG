@@ -1,46 +1,11 @@
-﻿@page "/v2"
-@page "/v2/{DebtorAcct}"
+﻿@page "/"
+@page "/{DebtorAcct}"
 
 
 <EditForm Model="@_viewRequestModel" OnValidSubmit="@ProcessTrans">
-    @*  <DataAnnotationsValidator />*@
     <ObjectGraphDataAnnotationsValidator></ObjectGraphDataAnnotationsValidator>
 
 
-
-
-    @*<div class="mb-3">
-        <div class="card" style="width: 100%">
-        <div class="card-body">
-        <div class="container">
-        <div class="row">
-        <div class="col-12 col-md-4">
-
-        <div class="mb-3">
-        <label for="txtMarchantId" class="form-label">Merchant ID</label>
-        <input @bind="_viewRequestModel.Outlet.MerchantID" type="text" class="form-control" id="txtMarchantId" placeholder="E.g. 192837645 " required>
-        </div>
-        </div>
-        <div class="col-12 col-md-4">
-        <div class="mb-3">
-        <label for="txtStoreID" class="form-label">Store ID</label>
-        <input @bind="_viewRequestModel.Outlet.StoreID" type="text" class="form-control" id="txtStoreID" placeholder="E.g. 0001" required>
-        </div>
-        </div>
-        <div class="col-12 col-md-4">
-
-        <div class="mb-3">
-        <label for="txtTerminalID" class="form-label">Terminal ID</label>
-        <input @bind="_viewRequestModel.Outlet.TerminalID" type="text" class="form-control" id="txtTerminalID" placeholder="E.g. 0001" required>
-        </div>
-        </div>
-        </div>
-        </div>
-
-
-        </div>
-        </div>
-        </div>*@
 
 
     <div class="mb-3">
@@ -54,14 +19,6 @@
                                 <input @bind="_viewRequestModel.Amount" type="decimal" class="form-control" id="txtAmountId" placeholder="Required Amount" required>
                             </div>
                         </div>
-
-                        @* <div class="col-12 col-md-4">
-                            <div class="mb-3">
-                            <label for="txtPaymentMethod" class="form-label">Payment Method</label>
-                            <input @bind="_viewRequestModel.PaymentMethod" type="text" class="form-control" id="txtPaymentMethod" placeholder="E.g. Card " required>
-                            </div>
-                            </div>*@
-
                     </div>
                 </div>
             </div>
@@ -104,15 +61,6 @@
                     </div>
 
                     <div class="row">
-
-                        @*<div class="col-12 col-md-4">
-
-                            <div class="mb-3">
-                            <label for="txtEntryMode" class="form-label">Entry Mode</label>
-                            <input @bind="_viewRequestModel.Card.EntryMode" type="text" class="form-control" id="txtEntryMode" placeholder="E.g. key " required>
-                            </div>
-                            </div>*@
-
                         <div class="col-12 col-md-4">
 
                             <div class="mb-3">
@@ -129,26 +77,7 @@
                                 <input @bind="_viewRequestModel.Card.CardHolderEmail" type="text" class="form-control" id="txtCardHolderEmail" placeholder="E.g. tester@testing.com ">
                             </div>
                         </div>
-
                     </div>
-
-                    @* <div class="row">
-                        <div class="col-12 col-md-4">
-
-                        <div class="mb-3">
-                        <label for="txtIsCardDataEncrypted" class="form-label">Is Card DataEncrypted</label>
-                        <input @bind="_viewRequestModel.Card.IsCardDataEncrypted" type="text" class="form-control" id="txtIsCardDataEncrypted" placeholder="E.g. false ">
-                        </div>
-                        </div>
-                        <div class="col-12 col-md-4">
-                        <div class="mb-3">
-                        <label for="txtIsEMVCapableDevice" class="form-label">Is EMV Capable Device</label>
-                        <input @bind="_viewRequestModel.Card.IsEMVCapableDevice" type="text" class="form-control" id="txtIsEMVCapableDevice" placeholder="E.g. false ">
-                        </div>
-                        </div>
-                        </div>*@
-
-
                 </div>
 
 
@@ -275,12 +204,12 @@ else
     }
     else
     {
-        if (_responseModel.ResponseCode == "000")
+        if (_responseModel is {ResponseCode: "000" })
         {
             <div class="alert alert-success" role="alert">
                 <h4 class="alert-heading">Response @_responseModel.ResponseCode</h4>
                 <p>
-                    InstaMed CC Processed for $  @_tempAmount &nbsp;
+                    InstaMed CC Approved for $  @_tempAmount &nbsp;
                     @if (_responseModel != null)
                     {
                         @_responseModel.ResponseMessage
@@ -299,7 +228,7 @@ else
             <div class="alert alert-danger" role="alert">
                 <h4 class="alert-heading">Response @_responseModel.ResponseCode</h4>
                 <p>
-                    InstaMed CC Processed for $  @_tempAmount &nbsp;
+                    InstaMed CC Declined for $  @_tempAmount &nbsp;
                     @if (_responseModel != null)
                     {
                         @_responseModel.ResponseMessage
