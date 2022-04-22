@@ -49,7 +49,8 @@ namespace LCG
             services.AddHttpClient<IProcessCardAuthorization, ProcessCardAuthorization>();
             services.AddScoped<IAddNotes, AddNotes>();
             services.AddScoped<IPopulateDataForProcessSales, PopulateDataForProcessSales>();
-            
+            services.AddScoped<IAutoPayment, AutoPayment>();
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
