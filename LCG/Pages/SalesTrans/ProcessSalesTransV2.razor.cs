@@ -32,7 +32,7 @@ namespace LCG.Pages.SalesTrans
             {
                 _viewRequestModel.Patient.FirstName = patientInfo.FirstName;
                 _viewRequestModel.Patient.LastName = patientInfo.LastName;
-                _viewRequestModel.Patient.AccountNumber = debtorAccountInfoT.SuppliedAcct;
+                _viewRequestModel.Patient.AccountNumber = debtorAccountInfoT.SuppliedAcct.TrimStart(new[] { '0' });//for leading zero
             }
         }
 
