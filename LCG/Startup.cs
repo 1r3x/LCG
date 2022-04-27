@@ -49,7 +49,7 @@ namespace LCG
             services.AddHttpClient<IProcessCardAuthorization, ProcessCardAuthorization>();
             services.AddScoped<IAddNotes, AddNotes>();
             services.AddScoped<IPopulateDataForProcessSales, PopulateDataForProcessSales>();
-            services.AddScoped<IAutoPayment, AutoPayment>();
+            services.AddScoped<IPayment, Payment>();
 
         }
 

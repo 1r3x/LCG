@@ -20,6 +20,9 @@ namespace EntityModelLibrary.Models
         public virtual DbSet<DebtorAcctInfoT> DebtorAcctInfoTs { get; set; }
         public virtual DbSet<NoteMaster> NoteMasters { get; set; }
         public virtual DbSet<PatientMaster> PatientMasters { get; set; }
+        public virtual DbSet<LcgCardInfo> LcgCardInfos { get; set; }
+        public virtual DbSet<LcgPaymentScheduleHistory> LcgPaymentScheduleHistories { get; set; }
+        public virtual DbSet<LcgPaymentSchedule> LcgPaymentSchedules { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -226,6 +229,31 @@ namespace EntityModelLibrary.Models
                 entity.Property(e => e.StateCode).IsUnicode(false);
 
                 entity.Property(e => e.Zip).IsUnicode(false);
+            });
+            modelBuilder.Entity<LcgCardInfo>(entity =>
+            {
+                entity.Property(e => e.BinNumber).IsUnicode(false);
+
+                entity.Property(e => e.EntryMode).IsUnicode(false);
+
+                entity.Property(e => e.LastFour).IsUnicode(false);
+
+                entity.Property(e => e.PaymentMethodId).IsUnicode(false);
+
+                entity.Property(e => e.Type).IsUnicode(false);
+            });
+
+            modelBuilder.Entity<LcgPaymentScheduleHistory>(entity =>
+            {
+                entity.Property(e => e.AuthorizationNumber).IsUnicode(false);
+
+                entity.Property(e => e.AuthorizationText).IsUnicode(false);
+
+                entity.Property(e => e.ResponseCode).IsUnicode(false);
+
+                entity.Property(e => e.ResponseMessage).IsUnicode(false);
+
+                entity.Property(e => e.TransactionId).IsUnicode(false);
             });
 
             OnModelCreatingPartial(modelBuilder);

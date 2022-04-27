@@ -16,6 +16,8 @@ namespace LCG.Pages.MultiplePayments
         [Parameter] public string DebtorAcct { get; set; }
         [Inject] private IProcessSaleTransactions SaleApi { get; set; }
         [Inject] private IProcessCardAuthorization CardApi { get; set; }
+        [Inject] private IPayment AutoPaymentApi { get; set; }
+
         private ViewMultiplePaymentsRequestModel _viewRequestModel = new();
         private ViewSaleResponseModel _responseModel;
         private int _numberOfPayment = 1;
@@ -28,8 +30,8 @@ namespace LCG.Pages.MultiplePayments
 
         protected override async Task OnInitializedAsync()
         {
-            var patientInfo = await PopulateData.GetPatientMasterData(DebtorAcct, "t");
-            var debtorAccountInfoT = await PopulateData.GetDebtorAccountInfoT(DebtorAcct, "t");
+            var patientInfo = await PopulateData.GetPatientMasterData(DebtorAcct, "T");
+            var debtorAccountInfoT = await PopulateData.GetDebtorAccountInfoT(DebtorAcct, "T");
             if (patientInfo != null && debtorAccountInfoT != null)
             {
                 _viewRequestModel.Patient.FirstName = patientInfo.FirstName;
@@ -37,12 +39,73 @@ namespace LCG.Pages.MultiplePayments
                 _viewRequestModel.Patient.AccountNumber = debtorAccountInfoT.SuppliedAcct.TrimStart(new[] { '0' });//for leading zero;
                 _viewRequestModel.Balance = debtorAccountInfoT.Balance;
                 _debtorAcctTBalance = debtorAccountInfoT.Balance;
-
-
             }
         }
+        private async Task Enroll()
+        {
+            _loadingBar = 0;
+            _isSubmitting = true;
+            var saleRequestModel = new SaleRequestModel()
+            {
+                Outlet = new ApiAccessLibrary.ApiModels.Outlet()
+                {
+                    //MerchantID = _viewRequestModel.Outlet.MerchantID,
+                    MerchantID = "192837645",
+                    //StoreID = _viewRequestModel.Outlet.StoreID,
+                    StoreID = "0001",
+                    //TerminalID = _viewRequestModel.Outlet.TerminalID
+                    TerminalID = "0001"
+                },
+                Amount = _viewRequestModel.Amount,
+                //PaymentMethod = _viewRequestModel.PaymentMethod,
+                PaymentMethod = "Card",
+                Card = new ApiAccessLibrary.ApiModels.Card()
+                {
+                    CVN = _viewRequestModel.Card.CVN,
+                    CardHolderEmail = _viewRequestModel.Card.CardHolderEmail,
+                    CardHolderName = _viewRequestModel.Card.CardHolderName,
+                    CardNumber = _viewRequestModel.Card.CardNumber,
+                    //EntryMode = _viewRequestModel.Card.EntryMode,
+                    EntryMode = "key",
+                    Expiration = _viewRequestModel.Card.Expiration,
+                    //IsCardDataEncrypted = _viewRequestModel.Card.IsCardDataEncrypted,
+                    IsCardDataEncrypted = false,
+                    //IsEMVCapableDevice = _viewRequestModel.Card.IsEMVCapableDevice,
+                    IsEMVCapableDevice = false,
+                },
+                Patient = new ApiAccessLibrary.ApiModels.Patient()
+                {
+                    AccountNumber = _viewRequestModel.Patient.AccountNumber,
+                    FirstName = _viewRequestModel.Patient.FirstName,
+                    LastName = _viewRequestModel.Patient.LastName
+                }
+            };
+            try
+            {
+                _loadingBar = 1;
+                var resultVerify = await AutoPaymentApi.PaymentPlan(saleRequestModel);
+                if (resultVerify.Contains("FieldErrors"))
+                {
+                    _errorModel = resultVerify;
+                }
+                else
+                {
+                    _tempAmount = _viewRequestModel.Amount;
+                    _responseModel = new ViewSaleResponseModel(resultVerify);
+                    _viewRequestModel = new ViewMultiplePaymentsRequestModel();
+                }
+                
 
-        private async Task ProcessSalesTrans()
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
+
+
+        }
+        private async Task ProcessSaleTrans()
         {
             _responseModel = null;
             _errorModel = null;
@@ -76,6 +139,12 @@ namespace LCG.Pages.MultiplePayments
                     IsCardDataEncrypted = false,
                     //IsEMVCapableDevice = _viewRequestModel.Card.IsEMVCapableDevice,
                     IsEMVCapableDevice = false,
+                },
+                Patient = new ApiAccessLibrary.ApiModels.Patient()
+                {
+                    AccountNumber = _viewRequestModel.Patient.AccountNumber,
+                    FirstName = _viewRequestModel.Patient.FirstName,
+                    LastName = _viewRequestModel.Patient.LastName
                 }
             };
             try
@@ -94,13 +163,20 @@ namespace LCG.Pages.MultiplePayments
                 }
 
                 string noteText = null;
-                if (@_responseModel != null)
+                if (@_responseModel != null && _responseModel.ResponseCode == "000")
                 {
-                    noteText = "InstaMed CC Processed for $" + _tempAmount + " " + @_responseModel.ResponseMessage +
-                               " Auth #:" + @_responseModel.AuthorizationNumber;
+                    noteText = "INSTAMED CC APPROVED FOR $" + _tempAmount + " " + @_responseModel.ResponseMessage.ToUpper() +
+                                  " AUTH #:" + @_responseModel.AuthorizationNumber;
+                }
+                else
+                {
+                    if (@_responseModel != null)
+                        noteText = "INSTAMED CC DECLINED FOR $" + _tempAmount + " " +
+                                   @_responseModel.ResponseMessage.ToUpper() +
+                                   " AUTH #:" + @_responseModel.AuthorizationNumber;
                 }
 
-                await AddNotes.Notes(DebtorAcct, 31950, "RA", noteText, "N", null, "t");
+                await AddNotes.Notes(DebtorAcct, 31950, "RA", noteText, "N", null, "PO");//PO for prod_old & T is for test_db
                 _loadingBar = 0;
                 _isSubmitting = false;
 
@@ -221,7 +297,7 @@ namespace LCG.Pages.MultiplePayments
         {
             if (_scheduleDateTime.Date == DateTime.Now.Date)
             {
-                await ProcessSalesTrans();
+                await ProcessSaleTrans();
             }
             else
             {

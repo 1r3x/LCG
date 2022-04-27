@@ -26,8 +26,8 @@ namespace LCG.Pages.SalesTrans
         private bool _isSubmitting;
         protected override async Task OnInitializedAsync()
         {
-            var patientInfo = await PopulateData.GetPatientMasterData(DebtorAcct, "PO");//PO for prod_old & T is for test_db
-            var debtorAccountInfoT = await PopulateData.GetDebtorAccountInfoT(DebtorAcct, "PO");//PO for prod_old & T is for test_db
+            var patientInfo = await PopulateData.GetPatientMasterData(DebtorAcct, "T");//PO for prod_old & T is for test_db
+            var debtorAccountInfoT = await PopulateData.GetDebtorAccountInfoT(DebtorAcct, "T");//PO for prod_old & T is for test_db
             if (patientInfo != null && debtorAccountInfoT != null)
             {
                 _viewRequestModel.Patient.FirstName = patientInfo.FirstName;
@@ -107,7 +107,7 @@ namespace LCG.Pages.SalesTrans
                                    " AUTH #:" + @_responseModel.AuthorizationNumber;
                 }
 
-                await AddNotes.Notes(DebtorAcct, 31950, "RA", noteText, "N", null, "PO");//PO for prod_old & T is for test_db
+                await AddNotes.Notes(DebtorAcct, 31950, "RA", noteText, "N", null, "T");//PO for prod_old & T is for test_db
                 _loadingBar = 0;
                 _isSubmitting = false;
 
