@@ -19,13 +19,16 @@ namespace EntityModelLibrary.Models
         public virtual DbSet<DebtorAcctInfoT> DebtorAcctInfoTs { get; set; }
         public virtual DbSet<NoteMaster> NoteMasters { get; set; }
         public virtual DbSet<PatientMaster> PatientMasters { get; set; }
+        public virtual DbSet<LcgCardInfo> LcgCardInfos { get; set; }
+        public virtual DbSet<LcgPaymentScheduleHistory> LcgPaymentScheduleHistories { get; set; }
+        public virtual DbSet<LcgPaymentSchedule> LcgPaymentSchedules { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (!optionsBuilder.IsConfigured)
             {
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
-                optionsBuilder.UseSqlServer("Server=192.168.0.10;Database=collect;User Id=cfusion;Password=T3mp@cc3ss");
+                optionsBuilder.UseSqlServer("Server=nv-sqltest01.aai.local;Database=collect;User Id=stephen;Password=Arizona2020!;");
             }
         }
 
@@ -225,6 +228,31 @@ namespace EntityModelLibrary.Models
                 entity.Property(e => e.StateCode).IsUnicode(false);
 
                 entity.Property(e => e.Zip).IsUnicode(false);
+            });
+            modelBuilder.Entity<LcgCardInfo>(entity =>
+            {
+                entity.Property(e => e.BinNumber).IsUnicode(false);
+
+                entity.Property(e => e.EntryMode).IsUnicode(false);
+
+                entity.Property(e => e.LastFour).IsUnicode(false);
+
+                entity.Property(e => e.PaymentMethodId).IsUnicode(false);
+
+                entity.Property(e => e.Type).IsUnicode(false);
+            });
+
+            modelBuilder.Entity<LcgPaymentScheduleHistory>(entity =>
+            {
+                entity.Property(e => e.AuthorizationNumber).IsUnicode(false);
+
+                entity.Property(e => e.AuthorizationText).IsUnicode(false);
+
+                entity.Property(e => e.ResponseCode).IsUnicode(false);
+
+                entity.Property(e => e.ResponseMessage).IsUnicode(false);
+
+                entity.Property(e => e.TransactionId).IsUnicode(false);
             });
 
             OnModelCreatingPartial(modelBuilder);

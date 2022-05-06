@@ -245,9 +245,11 @@
 
 @if (_responseModel == null && _errorModel == null)
 {
+    var userNameMac = Environment.UserName;
     if (_loadingBar == 1)
     {
-        <div class="spinner-grow text-primary" role="status">
+        <div>
+            class="spinner-grow text-primary" role="status">
             <span class="sr-only">Loading...</span>
         </div>
         <div class="spinner-grow text-secondary" role="status">
@@ -294,6 +296,7 @@ else
                 <h4 class="alert-heading">Response @_responseModel.ResponseCode</h4>
                 <p>
                     InstaMed CC Approved for $  @_tempAmount &nbsp;
+                    
                     @if (_responseModel != null)
                     {
                         @_responseModel.ResponseMessage

@@ -19,6 +19,7 @@ namespace LCG.Data
         public ApiAccessLibrary.ApiModels.Patient Patient { get; set; } = new ApiAccessLibrary.ApiModels.Patient();
         public DateTime StartingDate { get; set; }
         public int NumberOfPayments { get; set; }
+        [Range(double.Epsilon, double.MaxValue, ErrorMessage = "Please enter a value bigger than zero.")]
         public decimal Balance { get; set; }
 
     }

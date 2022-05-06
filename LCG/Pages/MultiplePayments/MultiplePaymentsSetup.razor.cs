@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using ApiAccessLibrary.ApiModels;
 using ApiAccessLibrary.Interfaces;
 using DataAccessLibrary.Interfaces;
+using EntityModelLibrary.Models;
 using LCG.Data;
 using Microsoft.AspNetCore.Components;
 
@@ -16,8 +17,11 @@ namespace LCG.Pages.MultiplePayments
         [Parameter] public string DebtorAcct { get; set; }
         [Inject] private IProcessSaleTransactions SaleApi { get; set; }
         [Inject] private IProcessCardAuthorization CardApi { get; set; }
-        [Inject] private IPayment AutoPaymentApi { get; set; }
-
+        [Inject] private IPayment Tokenization { get; set; }
+        [Inject] private IAddCardInfo AddCardInfo { get; set; }
+        [Inject] private IAddPaymentSchedule AddPaymentSchedule { get; set; }
+        private readonly DbContextForTest _dbContext;
+        private readonly DbContextForProdOld _dbContextProdOld;
         private ViewMultiplePaymentsRequestModel _viewRequestModel = new();
         private ViewSaleResponseModel _responseModel;
         private int _numberOfPayment = 1;
@@ -32,6 +36,7 @@ namespace LCG.Pages.MultiplePayments
         {
             var patientInfo = await PopulateData.GetPatientMasterData(DebtorAcct, "T");
             var debtorAccountInfoT = await PopulateData.GetDebtorAccountInfoT(DebtorAcct, "T");
+            var userNameMac = Environment.UserName;
             if (patientInfo != null && debtorAccountInfoT != null)
             {
                 _viewRequestModel.Patient.FirstName = patientInfo.FirstName;
@@ -39,71 +44,8 @@ namespace LCG.Pages.MultiplePayments
                 _viewRequestModel.Patient.AccountNumber = debtorAccountInfoT.SuppliedAcct.TrimStart(new[] { '0' });//for leading zero;
                 _viewRequestModel.Balance = debtorAccountInfoT.Balance;
                 _debtorAcctTBalance = debtorAccountInfoT.Balance;
-            }
-        }
-        private async Task Enroll()
-        {
-            _loadingBar = 0;
-            _isSubmitting = true;
-            var saleRequestModel = new SaleRequestModel()
-            {
-                Outlet = new ApiAccessLibrary.ApiModels.Outlet()
-                {
-                    //MerchantID = _viewRequestModel.Outlet.MerchantID,
-                    MerchantID = "192837645",
-                    //StoreID = _viewRequestModel.Outlet.StoreID,
-                    StoreID = "0001",
-                    //TerminalID = _viewRequestModel.Outlet.TerminalID
-                    TerminalID = "0001"
-                },
-                Amount = _viewRequestModel.Amount,
-                //PaymentMethod = _viewRequestModel.PaymentMethod,
-                PaymentMethod = "Card",
-                Card = new ApiAccessLibrary.ApiModels.Card()
-                {
-                    CVN = _viewRequestModel.Card.CVN,
-                    CardHolderEmail = _viewRequestModel.Card.CardHolderEmail,
-                    CardHolderName = _viewRequestModel.Card.CardHolderName,
-                    CardNumber = _viewRequestModel.Card.CardNumber,
-                    //EntryMode = _viewRequestModel.Card.EntryMode,
-                    EntryMode = "key",
-                    Expiration = _viewRequestModel.Card.Expiration,
-                    //IsCardDataEncrypted = _viewRequestModel.Card.IsCardDataEncrypted,
-                    IsCardDataEncrypted = false,
-                    //IsEMVCapableDevice = _viewRequestModel.Card.IsEMVCapableDevice,
-                    IsEMVCapableDevice = false,
-                },
-                Patient = new ApiAccessLibrary.ApiModels.Patient()
-                {
-                    AccountNumber = _viewRequestModel.Patient.AccountNumber,
-                    FirstName = _viewRequestModel.Patient.FirstName,
-                    LastName = _viewRequestModel.Patient.LastName
-                }
-            };
-            try
-            {
-                _loadingBar = 1;
-                var resultVerify = await AutoPaymentApi.PaymentPlan(saleRequestModel);
-                if (resultVerify.Contains("FieldErrors"))
-                {
-                    _errorModel = resultVerify;
-                }
-                else
-                {
-                    _tempAmount = _viewRequestModel.Amount;
-                    _responseModel = new ViewSaleResponseModel(resultVerify);
-                    _viewRequestModel = new ViewMultiplePaymentsRequestModel();
-                }
-                
 
             }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-                throw;
-            }
-
-
         }
         private async Task ProcessSaleTrans()
         {
@@ -116,15 +58,11 @@ namespace LCG.Pages.MultiplePayments
             {
                 Outlet = new ApiAccessLibrary.ApiModels.Outlet()
                 {
-                    //MerchantID = _viewRequestModel.Outlet.MerchantID,
                     MerchantID = "192837645",
-                    //StoreID = _viewRequestModel.Outlet.StoreID,
                     StoreID = "0001",
-                    //TerminalID = _viewRequestModel.Outlet.TerminalID
                     TerminalID = "0001"
                 },
                 Amount = _viewRequestModel.Amount,
-                //PaymentMethod = _viewRequestModel.PaymentMethod,
                 PaymentMethod = "Card",
                 Card = new ApiAccessLibrary.ApiModels.Card()
                 {
@@ -132,12 +70,9 @@ namespace LCG.Pages.MultiplePayments
                     CardHolderEmail = _viewRequestModel.Card.CardHolderEmail,
                     CardHolderName = _viewRequestModel.Card.CardHolderName,
                     CardNumber = _viewRequestModel.Card.CardNumber,
-                    //EntryMode = _viewRequestModel.Card.EntryMode,
                     EntryMode = "key",
                     Expiration = _viewRequestModel.Card.Expiration,
-                    //IsCardDataEncrypted = _viewRequestModel.Card.IsCardDataEncrypted,
                     IsCardDataEncrypted = false,
-                    //IsEMVCapableDevice = _viewRequestModel.Card.IsEMVCapableDevice,
                     IsEMVCapableDevice = false,
                 },
                 Patient = new ApiAccessLibrary.ApiModels.Patient()
@@ -160,6 +95,7 @@ namespace LCG.Pages.MultiplePayments
                     _tempAmount = _viewRequestModel.Amount;
                     _responseModel = new ViewSaleResponseModel(resultVerify);
                     _viewRequestModel = new ViewMultiplePaymentsRequestModel();
+                    
                 }
 
                 string noteText = null;
@@ -167,6 +103,7 @@ namespace LCG.Pages.MultiplePayments
                 {
                     noteText = "INSTAMED CC APPROVED FOR $" + _tempAmount + " " + @_responseModel.ResponseMessage.ToUpper() +
                                   " AUTH #:" + @_responseModel.AuthorizationNumber;
+                    await SaveCardInfoAnsScheduleData();
                 }
                 else
                 {
@@ -201,15 +138,11 @@ namespace LCG.Pages.MultiplePayments
             {
                 Outlet = new ApiAccessLibrary.ApiModels.Outlet()
                 {
-                    //MerchantID = _viewRequestModel.Outlet.MerchantID,
                     MerchantID = "192837645",
-                    //StoreID = _viewRequestModel.Outlet.StoreID,
                     StoreID = "0001",
-                    //TerminalID = _viewRequestModel.Outlet.TerminalID
                     TerminalID = "0001"
                 },
                 Amount = _viewRequestModel.Amount,
-                //PaymentMethod = _viewRequestModel.PaymentMethod,
                 PaymentMethod = "Card",
                 Card = new ApiAccessLibrary.ApiModels.Card()
                 {
@@ -217,12 +150,9 @@ namespace LCG.Pages.MultiplePayments
                     CardHolderEmail = _viewRequestModel.Card.CardHolderEmail,
                     CardHolderName = _viewRequestModel.Card.CardHolderName,
                     CardNumber = _viewRequestModel.Card.CardNumber,
-                    //EntryMode = _viewRequestModel.Card.EntryMode,
                     EntryMode = "key",
                     Expiration = _viewRequestModel.Card.Expiration,
-                    //IsCardDataEncrypted = _viewRequestModel.Card.IsCardDataEncrypted,
                     IsCardDataEncrypted = false,
-                    //IsEMVCapableDevice = _viewRequestModel.Card.IsEMVCapableDevice,
                     IsEMVCapableDevice = false,
                 },
                 Patient = new ApiAccessLibrary.ApiModels.Patient()
@@ -252,6 +182,7 @@ namespace LCG.Pages.MultiplePayments
                 {
                     noteText = "INSTAMED CC APPROVED FOR $" + _tempAmount + " " + @_responseModel.ResponseMessage.ToUpper() +
                                " AUTH #:" + @_responseModel.AuthorizationNumber;
+                    await SaveCardInfoAnsScheduleData();
                 }
                 else
                 {
@@ -275,6 +206,69 @@ namespace LCG.Pages.MultiplePayments
 
         }
 
+        private async Task SaveCardInfoAnsScheduleData()
+        {
+            var saleRequestModel = new PaymentPlanRequestModel()
+            {
+                Outlet = new ApiAccessLibrary.ApiModels.Outlet()
+                {
+                    MerchantID = "192837645",
+                    StoreID = "0001",
+                    TerminalID = "0001"
+                },
+                PaymentPlanType = "SaveOnFile",
+                PaymentMethod = "Card",
+                Card = new ApiAccessLibrary.ApiModels.Card()
+                {
+                    CVN = _viewRequestModel.Card.CVN,
+                    CardHolderEmail = _viewRequestModel.Card.CardHolderEmail,
+                    CardHolderName = _viewRequestModel.Card.CardHolderName,
+                    CardNumber = _viewRequestModel.Card.CardNumber,
+                    EntryMode = "key",
+                    Expiration = _viewRequestModel.Card.Expiration,
+                    IsCardDataEncrypted = false,
+                    IsEMVCapableDevice = false,
+                },
+            };
+            try
+            {
+                var resultVerify = await Tokenization.PaymentPlan(saleRequestModel);
+                
+                    var cardInfoData = new ViewPaymentPlanResponseModel(resultVerify);
+                    //await AddCardInfo.CreateCardInfo(cardInfoData.CardInfo,"T");
+                    var cardInfoObj = new LcgCardInfo()
+                    {
+                        IsActive = true,
+                        EntryMode = cardInfoData.CardInfo.EntryMode,
+                        BinNumber = cardInfoData.CardInfo.BinNumber,
+                        ExpirationMonth = cardInfoData.CardInfo.ExpirationMonth,
+                        ExpirationYear = cardInfoData.CardInfo.ExpirationYear,
+                        LastFour = cardInfoData.CardInfo.LastFour,
+                        PaymentMethodId = cardInfoData.CardInfo.PaymentMethodId,
+                        Type= cardInfoData.CardInfo.Type,
+                    };
+                    _dbContext.LcgCardInfos.Add(cardInfoObj);
+                    await _dbContext.SaveChangesAsync();
+
+                    var paymentScheduleObj = new LcgPaymentSchedule()
+                    {
+                        CardInfoId = cardInfoObj.Id,
+                        IsActive = true,
+                        EffectiveDate = _scheduleDateTime,
+                        NumerOfPayments = _numberOfPayment,
+                        PatientAccount = _viewRequestModel.Patient.AccountNumber
+                    };
+                    await AddPaymentSchedule.SavePaymentSchedule(paymentScheduleObj, _numberOfPayment, "T");
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+            
+
+        }
+
         private void OperationPutSlash()
         {
             if (_viewRequestModel.Card.Expiration is not { Length: 4 }) return;
@@ -295,6 +289,7 @@ namespace LCG.Pages.MultiplePayments
 
         private async Task SubmittingDecision()
         {
+
             if (_scheduleDateTime.Date == DateTime.Now.Date)
             {
                 await ProcessSaleTrans();

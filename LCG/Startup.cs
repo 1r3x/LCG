@@ -17,6 +17,7 @@ using DataAccessLibrary.Implementation;
 using DataAccessLibrary.Interfaces;
 using EntityModelLibrary.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 
 namespace LCG
 {
@@ -50,6 +51,8 @@ namespace LCG
             services.AddScoped<IAddNotes, AddNotes>();
             services.AddScoped<IPopulateDataForProcessSales, PopulateDataForProcessSales>();
             services.AddScoped<IPayment, Payment>();
+            services.AddScoped<IAddCardInfo, AddCardInfo>();
+            services.AddScoped<IAddPaymentSchedule, AddPaymentSchedule>();
 
         }
 

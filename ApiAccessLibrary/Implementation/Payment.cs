@@ -11,10 +11,10 @@ using ApiAccessLibrary.Interfaces;
 
 namespace ApiAccessLibrary.Implementation
 {
-    public class ProcessCardAuthorization : IProcessCardAuthorization
+    public class Payment : IPayment
     {
         private static HttpClient _client = new();
-        public ProcessCardAuthorization(HttpClient client)
+        public Payment(HttpClient client)
         {
             _client = client;
             _client.BaseAddress = new Uri("https://connect.instamed.com/");
@@ -24,10 +24,10 @@ namespace ApiAccessLibrary.Implementation
             _client.DefaultRequestHeaders.Accept.Add(
                 new MediaTypeWithQualityHeaderValue("application/json"));
         }
-        public async Task<string> PostCardAuthorizationAsync(SaleRequestModel requestModel)
+        public async Task<string> PaymentPlan(PaymentPlanRequestModel requestModel)
         {
             var response = await _client.PostAsJsonAsync(
-                "rest/payment/auth", requestModel);
+                "rest/payment/paymentplan", requestModel);
             var resultString = response.Content.ReadAsStringAsync();
             return resultString.Result;
         }
