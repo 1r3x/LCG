@@ -61,7 +61,7 @@
 
                             <div class="mb-3">
                                 <label for="txtBalance" class="form-label">Balance</label>
-                                <input type="number" @bind="_viewRequestModel.Balance" class="form-control" id="txtBalance" placeholder="E.g. 120" required>
+                                <input type="text" @bind="_viewRequestModel.Balance" class="form-control" id="txtBalance" placeholder="E.g. 120" required>
                             </div>
 
                         </div>
@@ -70,7 +70,7 @@
 
                             <div class="mb-3">
                                 <label for="txtAmount" class="form-label">Payment Amount</label>
-                                <input type="number" @bind="_viewRequestModel.Amount" class="form-control" id="txtAmount" placeholder="E.g. 25" required>
+                                <input type="text" @bind="_viewRequestModel.Amount" class="form-control" id="txtAmount" placeholder="E.g. 25" required>
                             </div>
                         </div>
                     </div>
@@ -248,8 +248,7 @@
     var userNameMac = Environment.UserName;
     if (_loadingBar == 1)
     {
-        <div>
-            class="spinner-grow text-primary" role="status">
+        <div class="spinner-grow text-primary" role="status">
             <span class="sr-only">Loading...</span>
         </div>
         <div class="spinner-grow text-secondary" role="status">
@@ -296,7 +295,7 @@ else
                 <h4 class="alert-heading">Response @_responseModel.ResponseCode</h4>
                 <p>
                     InstaMed CC Approved for $  @_tempAmount &nbsp;
-                    
+
                     @if (_responseModel != null)
                     {
                         @_responseModel.ResponseMessage

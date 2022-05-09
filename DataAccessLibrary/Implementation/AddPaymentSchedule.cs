@@ -17,6 +17,7 @@ namespace DataAccessLibrary.Implementation
             _dbContext = dbContext;
             _dbContextProdOld = dbContextProdOld;
         }
+        
         public async Task<string> SavePaymentSchedule(LcgPaymentSchedule paymentScheduleObj, int numberOfPayments, string environment)
         {
             try
@@ -35,6 +36,7 @@ namespace DataAccessLibrary.Implementation
                             PatientAccount = paymentScheduleObj.PatientAccount
                         };
                         await _dbContext.LcgPaymentSchedules.AddAsync(noteMaster);
+                       
                         paymentDate = paymentDate.AddMonths(1);
                     }
                     await _dbContext.SaveChangesAsync();

@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Linq.Dynamic.Core;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using ApiAccessLibrary.ApiModels;
 using ApiAccessLibrary.Interfaces;
@@ -6,6 +8,8 @@ using DataAccessLibrary.Interfaces;
 using EntityModelLibrary.Models;
 using LCG.Data;
 using Microsoft.AspNetCore.Components;
+using Microsoft.EntityFrameworkCore;
+using Radzen;
 
 namespace LCG.Pages.MultiplePayments
 {
@@ -20,9 +24,12 @@ namespace LCG.Pages.MultiplePayments
         [Inject] private IPayment Tokenization { get; set; }
         [Inject] private IAddCardInfo AddCardInfo { get; set; }
         [Inject] private IAddPaymentSchedule AddPaymentSchedule { get; set; }
-        private readonly DbContextForTest _dbContext;
-        private readonly DbContextForProdOld _dbContextProdOld;
-        private ViewMultiplePaymentsRequestModel _viewRequestModel = new();
+        [Inject] private DbContextForTest DbContext { get; set; }
+        [Inject] private DbContextForProdOld DbContextProdOld { get; set; }
+        [Inject] private IAddCcPayment AddCcPayment { get; set; }
+        //private readonly DbContextForTest _dbContext;
+        //private readonly DbContextForProdOld _dbContextProdOld;
+        private readonly ViewMultiplePaymentsRequestModel _viewRequestModel = new();
         private ViewSaleResponseModel _responseModel;
         private int _numberOfPayment = 1;
         private DateTime _scheduleDateTime = DateTime.Now;
@@ -94,8 +101,9 @@ namespace LCG.Pages.MultiplePayments
                 {
                     _tempAmount = _viewRequestModel.Amount;
                     _responseModel = new ViewSaleResponseModel(resultVerify);
-                    _viewRequestModel = new ViewMultiplePaymentsRequestModel();
-                    
+                    //todo clear field on finalizing 
+                    // _viewRequestModel = new ViewMultiplePaymentsRequestModel();
+
                 }
 
                 string noteText = null;
@@ -103,7 +111,9 @@ namespace LCG.Pages.MultiplePayments
                 {
                     noteText = "INSTAMED CC APPROVED FOR $" + _tempAmount + " " + @_responseModel.ResponseMessage.ToUpper() +
                                   " AUTH #:" + @_responseModel.AuthorizationNumber;
-                    await SaveCardInfoAnsScheduleData();
+                    await SaveCardInfoAndScheduleData();
+
+                   
                 }
                 else
                 {
@@ -112,8 +122,8 @@ namespace LCG.Pages.MultiplePayments
                                    @_responseModel.ResponseMessage.ToUpper() +
                                    " AUTH #:" + @_responseModel.AuthorizationNumber;
                 }
-
-                await AddNotes.Notes(DebtorAcct, 31950, "RA", noteText, "N", null, "PO");//PO for prod_old & T is for test_db
+                //actual employee =31950
+                await AddNotes.Notes(DebtorAcct, 31950, "RA", noteText, "N", null, "T");//PO for prod_old & T is for test_db
                 _loadingBar = 0;
                 _isSubmitting = false;
 
@@ -174,7 +184,9 @@ namespace LCG.Pages.MultiplePayments
                 {
                     _tempAmount = _viewRequestModel.Amount;
                     _responseModel = new ViewSaleResponseModel(resultVerify);
-                    _viewRequestModel = new ViewMultiplePaymentsRequestModel();
+                   
+                    //todo clear field on finalizing 
+                    //_viewRequestModel = new ViewMultiplePaymentsRequestModel();
                 }
 
                 string noteText = null;
@@ -182,7 +194,7 @@ namespace LCG.Pages.MultiplePayments
                 {
                     noteText = "INSTAMED CC APPROVED FOR $" + _tempAmount + " " + @_responseModel.ResponseMessage.ToUpper() +
                                " AUTH #:" + @_responseModel.AuthorizationNumber;
-                    await SaveCardInfoAnsScheduleData();
+                    await SaveCardInfoAndScheduleData();
                 }
                 else
                 {
@@ -192,7 +204,7 @@ namespace LCG.Pages.MultiplePayments
                                    " AUTH #:" + @_responseModel.AuthorizationNumber;
                 }
 
-                await AddNotes.Notes(DebtorAcct, 31950, "RA", noteText, "N", null, "t");
+                await AddNotes.Notes(DebtorAcct, 31950, "RA", noteText, "N", null, "T");
                 _loadingBar = 0;
                 _isSubmitting = false;
 
@@ -206,7 +218,7 @@ namespace LCG.Pages.MultiplePayments
 
         }
 
-        private async Task SaveCardInfoAnsScheduleData()
+        private async Task SaveCardInfoAndScheduleData()
         {
             var saleRequestModel = new PaymentPlanRequestModel()
             {
@@ -233,39 +245,98 @@ namespace LCG.Pages.MultiplePayments
             try
             {
                 var resultVerify = await Tokenization.PaymentPlan(saleRequestModel);
-                
-                    var cardInfoData = new ViewPaymentPlanResponseModel(resultVerify);
-                    //await AddCardInfo.CreateCardInfo(cardInfoData.CardInfo,"T");
-                    var cardInfoObj = new LcgCardInfo()
-                    {
-                        IsActive = true,
-                        EntryMode = cardInfoData.CardInfo.EntryMode,
-                        BinNumber = cardInfoData.CardInfo.BinNumber,
-                        ExpirationMonth = cardInfoData.CardInfo.ExpirationMonth,
-                        ExpirationYear = cardInfoData.CardInfo.ExpirationYear,
-                        LastFour = cardInfoData.CardInfo.LastFour,
-                        PaymentMethodId = cardInfoData.CardInfo.PaymentMethodId,
-                        Type= cardInfoData.CardInfo.Type,
-                    };
-                    _dbContext.LcgCardInfos.Add(cardInfoObj);
-                    await _dbContext.SaveChangesAsync();
 
-                    var paymentScheduleObj = new LcgPaymentSchedule()
+                var cardInfoData = new ViewPaymentPlanResponseModel(resultVerify);
+                //await AddCardInfo.CreateCardInfo(cardInfoData.CardInfo,"T");
+                var cardInfoObj = new LcgCardInfo()
+                {
+                    IsActive = true,
+                    EntryMode = cardInfoData.CardInfo.EntryMode,
+                    BinNumber = cardInfoData.CardInfo.BinNumber,
+                    ExpirationMonth = cardInfoData.CardInfo.ExpirationMonth,
+                    ExpirationYear = cardInfoData.CardInfo.ExpirationYear,
+                    LastFour = cardInfoData.CardInfo.LastFour,
+                    PaymentMethodId = cardInfoData.CardInfo.PaymentMethodId,
+                    Type = cardInfoData.CardInfo.Type,
+                };
+                DbContext.LcgCardInfos.Add(cardInfoObj);
+                await DbContext.SaveChangesAsync();
+
+                var paymentScheduleObj = new LcgPaymentSchedule()
+                {
+                    CardInfoId = cardInfoObj.Id,
+                    IsActive = true,
+                    EffectiveDate = _scheduleDateTime,
+                    NumerOfPayments = _numberOfPayment,
+                    PatientAccount = _viewRequestModel.Patient.AccountNumber
+                };
+                //await AddPaymentSchedule.SavePaymentSchedule(paymentScheduleObj, _numberOfPayment, "T");
+                //experimental
+                var paymentDate = paymentScheduleObj.EffectiveDate;
+                for (var i = 1; i <= _numberOfPayment; i++)
+                {
+                    var noteMaster = new LcgPaymentSchedule()
                     {
-                        CardInfoId = cardInfoObj.Id,
+                        CardInfoId = paymentScheduleObj.CardInfoId,
+                        EffectiveDate = paymentDate,
                         IsActive = true,
-                        EffectiveDate = _scheduleDateTime,
-                        NumerOfPayments = _numberOfPayment,
-                        PatientAccount = _viewRequestModel.Patient.AccountNumber
+                        NumerOfPayments = i,
+                        PatientAccount = paymentScheduleObj.PatientAccount
                     };
-                    await AddPaymentSchedule.SavePaymentSchedule(paymentScheduleObj, _numberOfPayment, "T");
+                    await DbContext.LcgPaymentSchedules.AddAsync(noteMaster);
+                    
+                    await DbContext.SaveChangesAsync();
+                    if (i == 1)
+                    {
+                        GlobalVariable.LcgPaymentScheduleId = noteMaster.Id;
+                    }
+                    paymentDate = paymentDate.AddMonths(1);
+
+                }
+                
+                
+
+                var paymentScheduleExample = new LcgPaymentScheduleHistory()
+                {
+                    ResponseCode = _responseModel.ResponseCode,
+                    AuthorizationNumber = _responseModel.AuthorizationNumber,
+                    AuthorizationText = Environment.UserName,
+                    ResponseMessage = _responseModel.ResponseMessage,
+                    PaymnetScheduleId = GlobalVariable.LcgPaymentScheduleId,
+                    TransactionId = ""
+                };
+
+                DbContext.LcgPaymentScheduleHistories.Add(paymentScheduleExample);
+                await DbContext.SaveChangesAsync();
+
+                var paymentScheduleUpdate =
+                    DbContext.LcgPaymentSchedules.FirstAsync(x => x.Id == GlobalVariable.LcgPaymentScheduleId);
+                paymentScheduleUpdate.Result.IsActive = false;
+                await DbContext.SaveChangesAsync();
+
+                var ccPaymentObj = new CcPayment()
+                {
+                    DebtorAcct = _viewRequestModel.Patient.AccountNumber,
+                    Company = "TOTAL CREDIT RECOVERY",
+                    UserId = Environment.UserName,
+                    UserName = Environment.UserName+" -LCG",
+                    ChargeTotal = _viewRequestModel.Amount,
+                    Subtotal = _viewRequestModel.Amount,
+                    PaymentDate = _scheduleDateTime,
+                    ApprovalStatus = "APPROVED",
+                    ApprovalCode = "",
+                    OrderNumber = "",
+                    RefNumber = "InstaMed",
+                    Sif = "Y"
+                };
+                await AddCcPayment.CreateCcPayment(ccPaymentObj, "T");
             }
             catch (Exception)
             {
 
                 throw;
             }
-            
+
 
         }
 
