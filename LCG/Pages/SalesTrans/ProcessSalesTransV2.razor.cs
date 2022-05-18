@@ -6,6 +6,7 @@ using ApiAccessLibrary.ApiModels;
 using Microsoft.AspNetCore.Components;
 using ApiAccessLibrary.Interfaces;
 using DataAccessLibrary.Interfaces;
+using EntityModelLibrary.Models;
 using LCG.Data;
 
 namespace LCG.Pages.SalesTrans
@@ -14,6 +15,7 @@ namespace LCG.Pages.SalesTrans
     public partial class ProcessSalesTransV2
     {
         [Inject] private IAddNotes AddNotes { get; set; }
+        [Inject] private IAddCcPayment AddCcPayment { get; set; }
         [Inject] private IPopulateDataForProcessSales PopulateData { get; set; }
         [Parameter]
         public string DebtorAcct { get; set; }
@@ -90,7 +92,7 @@ namespace LCG.Pages.SalesTrans
                 {
                     _tempAmount = _viewRequestModel.Amount;
                     _responseModel = new ViewSaleResponseModel(resultVerify);
-                    _viewRequestModel = new ViewSaleRequestModel();
+                    
                 }
 
                 string noteText = null;
@@ -98,6 +100,24 @@ namespace LCG.Pages.SalesTrans
                 {
                     noteText = "INSTAMED CC APPROVED FOR $" + _tempAmount + " " + @_responseModel.ResponseMessage.ToUpper() +
                                   " AUTH #:" + @_responseModel.AuthorizationNumber;
+                    //todo requirements auth
+                    var ccPaymentObj = new CcPayment()
+                    {
+                        DebtorAcct = _viewRequestModel.Patient.AccountNumber,
+                        Company = "TOTAL CREDIT RECOVERY",
+                        UserId = Environment.UserName,
+                        UserName = Environment.UserName + " -LCG",
+                        ChargeTotal = _viewRequestModel.Amount,
+                        Subtotal = _viewRequestModel.Amount,
+                        PaymentDate = DateTime.Now,
+                        ApprovalStatus = "APPROVED",
+                        ApprovalCode = "",
+                        OrderNumber = "",
+                        RefNumber = "INSTAMEDLH",
+                        Sif = "Y"
+                    };
+                    await AddCcPayment.CreateCcPayment(ccPaymentObj, "T");
+                    _viewRequestModel = new ViewSaleRequestModel();
                 }
                 else
                 {

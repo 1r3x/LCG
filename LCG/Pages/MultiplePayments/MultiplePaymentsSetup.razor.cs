@@ -29,7 +29,7 @@ namespace LCG.Pages.MultiplePayments
         [Inject] private IAddCcPayment AddCcPayment { get; set; }
         //private readonly DbContextForTest _dbContext;
         //private readonly DbContextForProdOld _dbContextProdOld;
-        private readonly ViewMultiplePaymentsRequestModel _viewRequestModel = new();
+        private  ViewMultiplePaymentsRequestModel _viewRequestModel = new();
         private ViewSaleResponseModel _responseModel;
         private int _numberOfPayment = 1;
         private DateTime _scheduleDateTime = DateTime.Now;
@@ -113,7 +113,7 @@ namespace LCG.Pages.MultiplePayments
                                   " AUTH #:" + @_responseModel.AuthorizationNumber;
                     await SaveCardInfoAndScheduleData();
 
-                   
+                    _viewRequestModel = new ViewMultiplePaymentsRequestModel();
                 }
                 else
                 {
@@ -195,6 +195,8 @@ namespace LCG.Pages.MultiplePayments
                     noteText = "INSTAMED CC APPROVED FOR $" + _tempAmount + " " + @_responseModel.ResponseMessage.ToUpper() +
                                " AUTH #:" + @_responseModel.AuthorizationNumber;
                     await SaveCardInfoAndScheduleData();
+
+                    _viewRequestModel = new ViewMultiplePaymentsRequestModel();
                 }
                 else
                 {
@@ -207,7 +209,6 @@ namespace LCG.Pages.MultiplePayments
                 await AddNotes.Notes(DebtorAcct, 31950, "RA", noteText, "N", null, "T");
                 _loadingBar = 0;
                 _isSubmitting = false;
-
             }
             catch (Exception e)
             {
@@ -326,7 +327,7 @@ namespace LCG.Pages.MultiplePayments
                     ApprovalStatus = "APPROVED",
                     ApprovalCode = "",
                     OrderNumber = "",
-                    RefNumber = "InstaMed",
+                    RefNumber = "INSTAMEDLH",
                     Sif = "Y"
                 };
                 await AddCcPayment.CreateCcPayment(ccPaymentObj, "T");

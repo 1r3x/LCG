@@ -19,6 +19,7 @@ namespace EntityModelLibrary.Models
         [Column(TypeName = "datetime")]
         public DateTime EffectiveDate { get; set; }
         public int CardInfoId { get; set; }
+        public decimal Amount { get; set; }
         public int NumerOfPayments { get; set; }
         public bool IsActive { get; set; }
     }
