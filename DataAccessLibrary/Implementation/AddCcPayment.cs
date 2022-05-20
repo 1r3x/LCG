@@ -30,7 +30,8 @@ namespace DataAccessLibrary.Implementation
                 }
                 else if (environment == "PO")
                 {
-                   
+                    await _dbContextProdOld.CcPayments.AddAsync(ccPaymentObj);
+                    await _dbContextProdOld.SaveChangesAsync();
                 }
                 else
                 {
