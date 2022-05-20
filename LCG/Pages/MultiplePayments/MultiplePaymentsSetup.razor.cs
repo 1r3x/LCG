@@ -269,7 +269,8 @@ namespace LCG.Pages.MultiplePayments
                     IsActive = true,
                     EffectiveDate = _scheduleDateTime,
                     NumerOfPayments = _numberOfPayment,
-                    PatientAccount = _viewRequestModel.Patient.AccountNumber
+                    PatientAccount = _viewRequestModel.Patient.AccountNumber,
+                    Amount = _viewRequestModel.Amount
                 };
                 //await AddPaymentSchedule.SavePaymentSchedule(paymentScheduleObj, _numberOfPayment, "T");
                 //experimental
@@ -282,7 +283,8 @@ namespace LCG.Pages.MultiplePayments
                         EffectiveDate = paymentDate,
                         IsActive = true,
                         NumerOfPayments = i,
-                        PatientAccount = paymentScheduleObj.PatientAccount
+                        PatientAccount = paymentScheduleObj.PatientAccount,
+                        Amount = paymentScheduleObj.Amount
                     };
                     await DbContext.LcgPaymentSchedules.AddAsync(noteMaster);
                     
@@ -325,10 +327,11 @@ namespace LCG.Pages.MultiplePayments
                     Subtotal = _viewRequestModel.Amount,
                     PaymentDate = _scheduleDateTime,
                     ApprovalStatus = "APPROVED",
-                    ApprovalCode = "",
-                    OrderNumber = "",
+                    BillingName = _viewRequestModel.Card.CardHolderName,
+                    ApprovalCode = _responseModel.ResponseCode,
+                    OrderNumber = _responseModel.TransactionId,
                     RefNumber = "INSTAMEDLH",
-                    Sif = "Y"
+                    Sif = "N"
                 };
                 await AddCcPayment.CreateCcPayment(ccPaymentObj, "T");
             }

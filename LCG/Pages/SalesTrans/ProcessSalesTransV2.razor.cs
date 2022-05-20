@@ -26,6 +26,7 @@ namespace LCG.Pages.SalesTrans
         private int _loadingBar;
         private decimal _tempAmount;
         private bool _isSubmitting;
+
         protected override async Task OnInitializedAsync()
         {
             var patientInfo = await PopulateData.GetPatientMasterData(DebtorAcct, "T");//PO for prod_old & T is for test_db
@@ -45,6 +46,11 @@ namespace LCG.Pages.SalesTrans
             _loadingBar = 0;
             _tempAmount = 0;
             _isSubmitting = true;
+            //checking for admin user
+            var username = Environment.UserName.Length > 5
+                ? Environment.UserName[..5] == "admin" ? "31950" : Environment.UserName
+                : Environment.UserName;
+            //
             var saleRequestModel = new SaleRequestModel()
             {
                 Outlet = new ApiAccessLibrary.ApiModels.Outlet()
@@ -100,23 +106,24 @@ namespace LCG.Pages.SalesTrans
                 {
                     noteText = "INSTAMED CC APPROVED FOR $" + _tempAmount + " " + @_responseModel.ResponseMessage.ToUpper() +
                                   " AUTH #:" + @_responseModel.AuthorizationNumber;
-                    //todo requirements auth
+                    // for success
                     var ccPaymentObj = new CcPayment()
                     {
-                        DebtorAcct = _viewRequestModel.Patient.AccountNumber,
+                        DebtorAcct = DebtorAcct,
                         Company = "TOTAL CREDIT RECOVERY",
-                        UserId = Environment.UserName,
-                        UserName = Environment.UserName + " -LCG",
+                        UserId = username,
+                        UserName = username + " -LCG",
                         ChargeTotal = _viewRequestModel.Amount,
                         Subtotal = _viewRequestModel.Amount,
                         PaymentDate = DateTime.Now,
                         ApprovalStatus = "APPROVED",
-                        ApprovalCode = "",
-                        OrderNumber = "",
+                        BillingName = _viewRequestModel.Card.CardHolderName,
+                        ApprovalCode = _responseModel.ResponseCode,
+                        OrderNumber =_responseModel.TransactionId,
                         RefNumber = "INSTAMEDLH",
-                        Sif = "Y"
+                        Sif = "N"
                     };
-                    await AddCcPayment.CreateCcPayment(ccPaymentObj, "T");
+                    await AddCcPayment.CreateCcPayment(ccPaymentObj, "T");//PO for prod_old & T is for test_db
                     _viewRequestModel = new ViewSaleRequestModel();
                 }
                 else
@@ -125,6 +132,27 @@ namespace LCG.Pages.SalesTrans
                         noteText = "INSTAMED CC DECLINED FOR $" + _tempAmount + " " +
                                    @_responseModel.ResponseMessage.ToUpper() +
                                    " AUTH #:" + @_responseModel.AuthorizationNumber;
+                    // for DECLINED
+                    if (_responseModel != null)
+                    {
+                        var ccPaymentObj = new CcPayment()
+                        {
+                            DebtorAcct = DebtorAcct,
+                            Company = "TOTAL CREDIT RECOVERY",
+                            UserId = username,
+                            UserName = username + " -LCG",
+                            ChargeTotal = _viewRequestModel.Amount,
+                            Subtotal = _viewRequestModel.Amount,
+                            PaymentDate = DateTime.Now,
+                            ApprovalStatus = "DECLINED",
+                            BillingName = _viewRequestModel.Card.CardHolderName,
+                            ErrorCode = _responseModel.ResponseCode,
+                            OrderNumber = _responseModel.TransactionId,
+                            RefNumber = "INSTAMEDLH",
+                            Sif = "N"
+                        };
+                        await AddCcPayment.CreateCcPayment(ccPaymentObj, "T");//PO for prod_old & T is for test_db
+                    }
                 }
 
                 await AddNotes.Notes(DebtorAcct, 31950, "RA", noteText, "N", null, "T");//PO for prod_old & T is for test_db
