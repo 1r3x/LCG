@@ -32,7 +32,7 @@ namespace DataAccessLibrary.Implementation
                             CardInfoId = paymentScheduleObj.CardInfoId,
                             EffectiveDate = paymentDate,
                             IsActive = true,
-                            NumerOfPayments = i,
+                            NumberOfPayments = i,
                             PatientAccount = paymentScheduleObj.PatientAccount
                         };
                         await _dbContext.LcgPaymentSchedules.AddAsync(noteMaster);
@@ -51,7 +51,7 @@ namespace DataAccessLibrary.Implementation
                             CardInfoId = paymentScheduleObj.CardInfoId,
                             EffectiveDate = paymentDate,
                             IsActive = true,
-                            NumerOfPayments = i,
+                            NumberOfPayments = i,
                             PatientAccount = paymentScheduleObj.PatientAccount
                         };
                         await _dbContextProdOld.LcgPaymentSchedules.AddAsync(noteMaster);
@@ -69,7 +69,7 @@ namespace DataAccessLibrary.Implementation
                             CardInfoId = paymentScheduleObj.CardInfoId,
                             EffectiveDate = paymentDate,
                             IsActive = true,
-                            NumerOfPayments = i,
+                            NumberOfPayments = i,
                             PatientAccount = paymentScheduleObj.PatientAccount
                         };
                         await _dbContext.LcgPaymentSchedules.AddAsync(noteMaster);

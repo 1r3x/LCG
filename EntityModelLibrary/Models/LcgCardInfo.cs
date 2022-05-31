@@ -27,6 +27,12 @@ namespace EntityModelLibrary.Models
         public string LastFour { get; set; }
         public int? ExpirationMonth { get; set; }
         public int? ExpirationYear { get; set; }
+        [Required]
+        [StringLength(50)]
+        public string CardHolderName { get; set; }
+        [Required]
+        [StringLength(12)]
+        public string AssociateDebtorAcct { get; set; }
         public bool IsActive { get; set; }
     }
 }

@@ -27,8 +27,7 @@ namespace LCG.Pages.MultiplePayments
         [Inject] private DbContextForTest DbContext { get; set; }
         [Inject] private DbContextForProdOld DbContextProdOld { get; set; }
         [Inject] private IAddCcPayment AddCcPayment { get; set; }
-        //private readonly DbContextForTest _dbContext;
-        //private readonly DbContextForProdOld _dbContextProdOld;
+        
         private  ViewMultiplePaymentsRequestModel _viewRequestModel = new();
         private ViewSaleResponseModel _responseModel;
         private int _numberOfPayment = 1;
@@ -44,6 +43,7 @@ namespace LCG.Pages.MultiplePayments
             var patientInfo = await PopulateData.GetPatientMasterData(DebtorAcct, "T");
             var debtorAccountInfoT = await PopulateData.GetDebtorAccountInfoT(DebtorAcct, "T");
             var userNameMac = Environment.UserName;
+
             if (patientInfo != null && debtorAccountInfoT != null)
             {
                 _viewRequestModel.Patient.FirstName = patientInfo.FirstName;
@@ -101,8 +101,6 @@ namespace LCG.Pages.MultiplePayments
                 {
                     _tempAmount = _viewRequestModel.Amount;
                     _responseModel = new ViewSaleResponseModel(resultVerify);
-                    //todo clear field on finalizing 
-                    // _viewRequestModel = new ViewMultiplePaymentsRequestModel();
 
                 }
 
@@ -185,8 +183,6 @@ namespace LCG.Pages.MultiplePayments
                     _tempAmount = _viewRequestModel.Amount;
                     _responseModel = new ViewSaleResponseModel(resultVerify);
                    
-                    //todo clear field on finalizing 
-                    //_viewRequestModel = new ViewMultiplePaymentsRequestModel();
                 }
 
                 string noteText = null;
@@ -259,6 +255,8 @@ namespace LCG.Pages.MultiplePayments
                     LastFour = cardInfoData.CardInfo.LastFour,
                     PaymentMethodId = cardInfoData.CardInfo.PaymentMethodId,
                     Type = cardInfoData.CardInfo.Type,
+                    AssociateDebtorAcct = DebtorAcct,
+                    CardHolderName = _viewRequestModel.Card.CardHolderName
                 };
                 DbContext.LcgCardInfos.Add(cardInfoObj);
                 await DbContext.SaveChangesAsync();
@@ -268,7 +266,7 @@ namespace LCG.Pages.MultiplePayments
                     CardInfoId = cardInfoObj.Id,
                     IsActive = true,
                     EffectiveDate = _scheduleDateTime,
-                    NumerOfPayments = _numberOfPayment,
+                    NumberOfPayments = _numberOfPayment,
                     PatientAccount = _viewRequestModel.Patient.AccountNumber,
                     Amount = _viewRequestModel.Amount
                 };
@@ -282,7 +280,7 @@ namespace LCG.Pages.MultiplePayments
                         CardInfoId = paymentScheduleObj.CardInfoId,
                         EffectiveDate = paymentDate,
                         IsActive = true,
-                        NumerOfPayments = i,
+                        NumberOfPayments = i,
                         PatientAccount = paymentScheduleObj.PatientAccount,
                         Amount = paymentScheduleObj.Amount
                     };
@@ -305,8 +303,8 @@ namespace LCG.Pages.MultiplePayments
                     AuthorizationNumber = _responseModel.AuthorizationNumber,
                     AuthorizationText = Environment.UserName,
                     ResponseMessage = _responseModel.ResponseMessage,
-                    PaymnetScheduleId = GlobalVariable.LcgPaymentScheduleId,
-                    TransactionId = ""
+                    PaymentScheduleId = GlobalVariable.LcgPaymentScheduleId,
+                    TransactionId = _responseModel.TransactionId
                 };
 
                 DbContext.LcgPaymentScheduleHistories.Add(paymentScheduleExample);

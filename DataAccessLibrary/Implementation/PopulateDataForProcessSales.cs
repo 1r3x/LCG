@@ -83,5 +83,34 @@ namespace DataAccessLibrary.Implementation
                     }).SingleOrDefaultAsync();
             }
         }
+
+        public async Task<DebtorAcctInfoT> GetDebtorAccountNoByPatientAcct(string patientAcct, string environment)
+        {
+            if (environment == "T")
+            {
+                return await _dbContext.DebtorAcctInfoTs.Where(x => x.SuppliedAcct.TrimStart(new[] { '0' }) == patientAcct).Select(i =>
+                    new DebtorAcctInfoT()
+                    {
+                        DebtorAcct = i.DebtorAcct
+                    }).SingleOrDefaultAsync();
+            }
+            else if (environment == "PO")
+            {
+                return await _dbContextProdOld.DebtorAcctInfoTs.Where(x => x.SuppliedAcct.TrimStart(new[] { '0' }) == patientAcct).Select(i =>
+                    new DebtorAcctInfoT()
+                    {
+                        DebtorAcct = i.DebtorAcct
+                    }).SingleOrDefaultAsync();
+            }
+            else
+            {
+                //this is just a demo implements 
+                return await _dbContext.DebtorAcctInfoTs.Where(x => x.SuppliedAcct.TrimStart(new[] { '0' }) == patientAcct).Select(i =>
+                    new DebtorAcctInfoT()
+                    {
+                        DebtorAcct = i.DebtorAcct
+                    }).SingleOrDefaultAsync();
+            }
+        }
     }
 }

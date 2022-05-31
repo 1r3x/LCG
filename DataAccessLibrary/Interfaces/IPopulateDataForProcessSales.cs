@@ -12,6 +12,7 @@ namespace DataAccessLibrary.Interfaces
 
         Task<PatientMaster> GetPatientMasterData(string debtorAcct, string environment);
         Task<DebtorAcctInfoT> GetDebtorAccountInfoT(string debtorAcct, string environment);
+        Task<DebtorAcctInfoT> GetDebtorAccountNoByPatientAcct(string patientAcct, string environment);
 
 
     }

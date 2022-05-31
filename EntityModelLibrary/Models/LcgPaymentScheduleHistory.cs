@@ -13,7 +13,7 @@ namespace EntityModelLibrary.Models
     {
         [Key]
         public int Id { get; set; }
-        public int PaymnetScheduleId { get; set; }
+        public int PaymentScheduleId { get; set; }
         [StringLength(150)]
         public string TransactionId { get; set; }
         [StringLength(50)]
@@ -24,5 +24,7 @@ namespace EntityModelLibrary.Models
         public string AuthorizationNumber { get; set; }
         [StringLength(50)]
         public string AuthorizationText { get; set; }
+        [Column(TypeName = "datetime")]
+        public DateTime? TimeLog { get; set; }
     }
 }

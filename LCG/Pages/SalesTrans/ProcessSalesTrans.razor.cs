@@ -35,15 +35,11 @@ namespace LCG.Pages.SalesTrans
             {
                 Outlet = new ApiAccessLibrary.ApiModels.Outlet()
                 {
-                    //MerchantID = _viewRequestModel.Outlet.MerchantID,
                     MerchantID = "192837645",
-                    //StoreID = _viewRequestModel.Outlet.StoreID,
                     StoreID = "0001",
-                    //TerminalID = _viewRequestModel.Outlet.TerminalID
                     TerminalID = "0001"
                 },
                 Amount = _viewRequestModel.Amount,
-                //PaymentMethod = _viewRequestModel.PaymentMethod,
                 PaymentMethod = "Card",
                 Card = new ApiAccessLibrary.ApiModels.Card()
                 {
@@ -51,12 +47,9 @@ namespace LCG.Pages.SalesTrans
                     CardHolderEmail = _viewRequestModel.Card.CardHolderEmail,
                     CardHolderName = _viewRequestModel.Card.CardHolderName,
                     CardNumber = _viewRequestModel.Card.CardNumber,
-                    //EntryMode = _viewRequestModel.Card.EntryMode,
                     EntryMode = "key",
                     Expiration = _viewRequestModel.Card.Expiration,
-                    //IsCardDataEncrypted = _viewRequestModel.Card.IsCardDataEncrypted,
                     IsCardDataEncrypted = false,
-                    //IsEMVCapableDevice = _viewRequestModel.Card.IsEMVCapableDevice,
                     IsEMVCapableDevice = false,
                 },
                 Patient = new ApiAccessLibrary.ApiModels.Patient()

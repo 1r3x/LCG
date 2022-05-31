@@ -55,6 +55,7 @@ namespace LCG
             services.AddScoped<IAddPaymentSchedule, AddPaymentSchedule>();
             services.AddScoped<IAddCcPayment, AddCcPayment>();
             services.AddScoped<IGetPreSchedulePaymentInfo, GetPreSchedulePaymentInfo>();
+            services.AddScoped<IGetDetailsOfPreSchedulePayment, GetDetailsOfPreSchedulePayment>();
 
         }
 

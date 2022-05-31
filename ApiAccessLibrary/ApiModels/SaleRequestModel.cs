@@ -14,6 +14,7 @@ namespace ApiAccessLibrary.ApiModels
         public Card Card { get; set; }
         public BillingAddress BillingAddress { get; set; }
         public Patient Patient { get; set; }
+        public String PaymentMethodID { get; set; }
 
     }
 

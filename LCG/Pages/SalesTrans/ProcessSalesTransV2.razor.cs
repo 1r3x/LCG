@@ -8,6 +8,7 @@ using ApiAccessLibrary.Interfaces;
 using DataAccessLibrary.Interfaces;
 using EntityModelLibrary.Models;
 using LCG.Data;
+using Microsoft.AspNetCore.Http;
 
 namespace LCG.Pages.SalesTrans
 {
@@ -47,6 +48,7 @@ namespace LCG.Pages.SalesTrans
             _tempAmount = 0;
             _isSubmitting = true;
             //checking for admin user
+
             var username = Environment.UserName.Length > 5
                 ? Environment.UserName[..5] == "admin" ? "31950" : Environment.UserName
                 : Environment.UserName;
@@ -55,15 +57,11 @@ namespace LCG.Pages.SalesTrans
             {
                 Outlet = new ApiAccessLibrary.ApiModels.Outlet()
                 {
-                    //MerchantID = _viewRequestModel.Outlet.MerchantID,
                     MerchantID = "192837645",
-                    //StoreID = _viewRequestModel.Outlet.StoreID,
                     StoreID = "0001",
-                    //TerminalID = _viewRequestModel.Outlet.TerminalID
                     TerminalID = "0001"
                 },
                 Amount = _viewRequestModel.Amount,
-                //PaymentMethod = _viewRequestModel.PaymentMethod,
                 PaymentMethod = "Card",
                 Card = new ApiAccessLibrary.ApiModels.Card()
                 {
@@ -71,12 +69,9 @@ namespace LCG.Pages.SalesTrans
                     CardHolderEmail = _viewRequestModel.Card.CardHolderEmail,
                     CardHolderName = _viewRequestModel.Card.CardHolderName,
                     CardNumber = _viewRequestModel.Card.CardNumber,
-                    //EntryMode = _viewRequestModel.Card.EntryMode,
                     EntryMode = "key",
                     Expiration = _viewRequestModel.Card.Expiration,
-                    //IsCardDataEncrypted = _viewRequestModel.Card.IsCardDataEncrypted,
                     IsCardDataEncrypted = false,
-                    //IsEMVCapableDevice = _viewRequestModel.Card.IsEMVCapableDevice,
                     IsEMVCapableDevice = false,
                 },
                 Patient = new ApiAccessLibrary.ApiModels.Patient()
@@ -111,8 +106,10 @@ namespace LCG.Pages.SalesTrans
                     {
                         DebtorAcct = DebtorAcct,
                         Company = "TOTAL CREDIT RECOVERY",
-                        UserId = username,
-                        UserName = username + " -LCG",
+                        //UserId = username,
+                        UserId = "LCG",
+                        //UserName = username + " -LCG",
+                        UserName = "LCG",
                         ChargeTotal = _viewRequestModel.Amount,
                         Subtotal = _viewRequestModel.Amount,
                         PaymentDate = DateTime.Now,
@@ -121,7 +118,8 @@ namespace LCG.Pages.SalesTrans
                         ApprovalCode = _responseModel.ResponseCode,
                         OrderNumber =_responseModel.TransactionId,
                         RefNumber = "INSTAMEDLH",
-                        Sif = "N"
+                        Sif = "N",
+                        VoidSale = "N"
                     };
                     await AddCcPayment.CreateCcPayment(ccPaymentObj, "T");//PO for prod_old & T is for test_db
                     _viewRequestModel = new ViewSaleRequestModel();
@@ -139,8 +137,10 @@ namespace LCG.Pages.SalesTrans
                         {
                             DebtorAcct = DebtorAcct,
                             Company = "TOTAL CREDIT RECOVERY",
-                            UserId = username,
-                            UserName = username + " -LCG",
+                            //UserId = username,
+                            UserId = "LCG",
+                            //UserName = username + " -LCG",
+                            UserName = "LCG",
                             ChargeTotal = _viewRequestModel.Amount,
                             Subtotal = _viewRequestModel.Amount,
                             PaymentDate = DateTime.Now,
@@ -149,7 +149,8 @@ namespace LCG.Pages.SalesTrans
                             ErrorCode = _responseModel.ResponseCode,
                             OrderNumber = _responseModel.TransactionId,
                             RefNumber = "INSTAMEDLH",
-                            Sif = "N"
+                            Sif = "N",
+                            VoidSale = "N"
                         };
                         await AddCcPayment.CreateCcPayment(ccPaymentObj, "T");//PO for prod_old & T is for test_db
                     }

@@ -19,9 +19,9 @@ namespace EntityModelLibrary.Models
         [Column(TypeName = "datetime")]
         public DateTime EffectiveDate { get; set; }
         public int CardInfoId { get; set; }
-        [Column(TypeName = "decimal")]
+        [Column(TypeName = "decimal(18, 2)")]
         public decimal Amount { get; set; }
-        public int NumerOfPayments { get; set; }
+        public int NumberOfPayments { get; set; }
         public bool IsActive { get; set; }
     }
 }

@@ -225,7 +225,11 @@ namespace EntityModelLibrary.Models
             });
             modelBuilder.Entity<LcgCardInfo>(entity =>
             {
+                entity.Property(e => e.AssociateDebtorAcct).IsUnicode(false);
+
                 entity.Property(e => e.BinNumber).IsUnicode(false);
+
+                entity.Property(e => e.CardHolderName).IsUnicode(false);
 
                 entity.Property(e => e.EntryMode).IsUnicode(false);
 
@@ -234,6 +238,11 @@ namespace EntityModelLibrary.Models
                 entity.Property(e => e.PaymentMethodId).IsUnicode(false);
 
                 entity.Property(e => e.Type).IsUnicode(false);
+            });
+
+            modelBuilder.Entity<LcgPaymentSchedule>(entity =>
+            {
+                entity.Property(e => e.PatientAccount).IsUnicode(false);
             });
 
             modelBuilder.Entity<LcgPaymentScheduleHistory>(entity =>
