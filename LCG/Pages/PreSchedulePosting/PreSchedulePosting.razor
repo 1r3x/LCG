@@ -1,0 +1,128 @@
+﻿@page "/PreSchedulePosting"
+@using EntityModelLibrary.Models;
+
+
+<RadzenDataGrid AllowFiltering="true" AllowPaging="true" PageSize="5" AllowSorting="true"
+                Data="@_paymentSchedule" TItem="LcgPaymentSchedule">
+    <Columns>
+        @*<RadzenDataGridColumn Width="50px" TItem="LcgPaymentSchedule"
+            Title="#" Filterable="false"
+            Property="Id"
+            Sortable="false" TextAlign="TextAlign.Center">
+            </RadzenDataGridColumn>*@
+
+        <RadzenDataGridColumn TItem="LcgPaymentSchedule" Property="PatientAccount" Title="Patient Account">
+
+        </RadzenDataGridColumn>
+        @*<RadzenDataGridColumn TItem="LcgPaymentSchedule" Property="EffectiveDate" Title="Order Date" FormatString="{0:d}" />*@
+        @*<RadzenDataGridColumn TItem="LcgPaymentSchedule" Property="CardInfoId" Title="Freight">
+
+            </RadzenDataGridColumn>*@
+        <RadzenDataGridColumn TItem="LcgPaymentSchedule" Property="Amount" Title="Amount" />
+        <RadzenDataGridColumn Width="240px" TItem="LcgPaymentSchedule" Property="NumberOfPayments" Title="Action">
+            <Template Context="data">
+
+
+                @if (data.IsActive == true)
+                {
+                    <RadzenButton ButtonStyle="ButtonStyle.Info" Icon="info" Class="m-1" IsBusy=@_busyClick Click=@(() => OpenOrder(data.Id)) Text="Pay Now" />
+                }
+                @if (data.IsActive == false)
+                {
+                    <RadzenButton ButtonStyle="ButtonStyle.Success" Disabled="true" Icon="check_circle" Class="m-1" Text="Paid Successfully" />
+                }
+
+
+            </Template>
+        </RadzenDataGridColumn>
+    </Columns>
+</RadzenDataGrid>
+<br />
+@if (_responseModel == null && _errorModel == null)
+{
+    var userNameMac = Environment.UserName;
+    if (_loadingBar == 1)
+    {
+        <div class="spinner-grow text-primary" role="status">
+            <span class="sr-only">Loading...</span>
+        </div>
+        <div class="spinner-grow text-secondary" role="status">
+            <span class="sr-only">Loading...</span>
+        </div>
+        <div class="spinner-grow text-success" role="status">
+            <span class="sr-only">Loading...</span>
+        </div>
+        <div class="spinner-grow text-danger" role="status">
+            <span class="sr-only">Loading...</span>
+        </div>
+        <div class="spinner-grow text-warning" role="status">
+            <span class="sr-only">Loading...</span>
+        </div>
+        <div class="spinner-grow text-info" role="status">
+            <span class="sr-only">Loading...</span>
+        </div>
+        <div class="spinner-grow text-light" role="status">
+            <span class="sr-only">Loading...</span>
+        </div>
+        <div class="spinner-grow text-dark" role="status">
+            <span class="sr-only">Loading...</span>
+        </div>
+    }
+
+
+}
+else
+{
+    if (_responseModel == null && _errorModel != null)
+    {
+        <div class="alert alert-danger" role="alert">
+            <h4 class="alert-heading">Error Response</h4>
+            <p>
+                @_errorModel
+            </p>
+        </div>
+    }
+    else
+    {
+        if (_responseModel != null && _responseModel.ResponseCode == "000")
+        {
+            <div class="alert alert-success" role="alert">
+                <h4 class="alert-heading">Response @_responseModel.ResponseCode</h4>
+                <p>
+                    InstaMed CC Approved for $  @_tempAmount &nbsp;
+
+                    @if (_responseModel != null)
+                    {
+                        @_responseModel.ResponseMessage
+                    }
+                    &nbsp; Auth #:
+                    @if (_responseModel != null)
+                    {
+                        @_responseModel.AuthorizationNumber
+                    }
+
+                </p>
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-danger" role="alert">
+                <h4 class="alert-heading">Response @_responseModel.ResponseCode</h4>
+                <p>
+                    InstaMed CC Declined for $  @_tempAmount &nbsp;
+                    @if (_responseModel != null)
+                    {
+                        @_responseModel.ResponseMessage
+                    }
+                    &nbsp; Auth #:
+                    @if (_responseModel != null)
+                    {
+                        @_responseModel.AuthorizationNumber
+                    }
+
+                </p>
+            </div>
+        }
+
+    }
+}
