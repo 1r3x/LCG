@@ -18,6 +18,7 @@ using DataAccessLibrary.Interfaces;
 using EntityModelLibrary.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
+using EntityModelLibrary.ViewModels;
 
 namespace LCG
 {
@@ -35,6 +36,8 @@ namespace LCG
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
+            //todo experiment 
+            //
             services.AddRazorPages();
             services.AddServerSideBlazor();
             services.AddSingleton<WeatherForecastService>();
@@ -44,7 +47,11 @@ namespace LCG
             //this context is used for prod_old environment 
             services.AddDbContext<DbContextForProdOld>(
                 options => options.UseSqlServer("name=ConnectionStrings:ProdOldConnection"));
-
+            //this context is used for prod environment 
+            services.AddDbContext<DbContextForProd>(
+                options => options.UseSqlServer("name=ConnectionStrings:ProdConnection"));
+            //for centralize data 
+            services.Configure<CentralizeVariablesModel>(Configuration.GetSection("CentralizeVariables"));
             //DI
             services.AddHttpClient<IProcessSaleTransactions, ProcessSaleTransactions>();
             services.AddHttpClient<IProcessCardAuthorization, ProcessCardAuthorization>();
@@ -56,6 +63,10 @@ namespace LCG
             services.AddScoped<IAddCcPayment, AddCcPayment>();
             services.AddScoped<IGetPreSchedulePaymentInfo, GetPreSchedulePaymentInfo>();
             services.AddScoped<IGetDetailsOfPreSchedulePayment, GetDetailsOfPreSchedulePayment>();
+            services.AddScoped<IAddPaymentScheduleHistory, AddPaymentScheduleHistory>();
+            services.AddScoped<IiProGatewayServices, IProGatewayServices>();
+            //state managements 
+            services.AddScoped<StateContainer>();
 
         }
 
