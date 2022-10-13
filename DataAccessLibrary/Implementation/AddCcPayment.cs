@@ -12,11 +12,13 @@ namespace DataAccessLibrary.Implementation
     {
         private readonly DbContextForTest _dbContext;
         private readonly DbContextForProdOld _dbContextProdOld;
-
-        public AddCcPayment(DbContextForTest dbContext, DbContextForProdOld dbContextProdOld)
+        private readonly DbContextForProd _dbContextForProd;
+        public AddCcPayment(DbContextForTest dbContext, DbContextForProdOld dbContextProdOld,
+            DbContextForProd dbContextForProd)
         {
             _dbContext = dbContext;
             _dbContextProdOld = dbContextProdOld;
+            _dbContextForProd = dbContextForProd;
         }
 
         public async Task<string> CreateCcPayment(CcPayment ccPaymentObj, string environment)
@@ -32,6 +34,11 @@ namespace DataAccessLibrary.Implementation
                 {
                     await _dbContextProdOld.CcPayments.AddAsync(ccPaymentObj);
                     await _dbContextProdOld.SaveChangesAsync();
+                }
+                else if (environment == "P")
+                {
+                    await _dbContextForProd.CcPayments.AddAsync(ccPaymentObj);
+                    await _dbContextForProd.SaveChangesAsync();
                 }
                 else
                 {

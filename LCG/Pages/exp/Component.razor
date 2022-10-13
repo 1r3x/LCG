@@ -1,0 +1,21 @@
+﻿@page "/test"
+@using ApiAccessLibrary.Interfaces
+
+<h3>test</h3>
+
+
+    <div class="mb-3">
+        <button type="submit" @onclick="ProcessTrans" class="btn btn-outline-success">Submit</button>
+    </div>
+
+
+
+
+@code {
+    [Inject] private IiProGatewayServices Api { get; set; }
+
+    private async Task ProcessTrans()
+    {
+        await Api.PostIProGateway();
+    }
+}

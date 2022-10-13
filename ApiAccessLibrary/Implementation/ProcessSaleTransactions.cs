@@ -5,23 +5,29 @@ using System.Net.Http.Json;
 using System.Threading.Tasks;
 using ApiAccessLibrary.ApiModels;
 using ApiAccessLibrary.Interfaces;
+using EntityModelLibrary.ViewModels;
+using Microsoft.Extensions.Options;
 
 namespace ApiAccessLibrary.Implementation
 {
+
     public class ProcessSaleTransactions : IProcessSaleTransactions
     {
         private static HttpClient _client = new();
-        public ProcessSaleTransactions(HttpClient client)
+
+        private readonly IOptions<CentralizeVariablesModel> _centralizeVariablesModel;
+        public ProcessSaleTransactions(HttpClient client, IOptions<CentralizeVariablesModel> centralizeVariablesModel)
         {
+            _centralizeVariablesModel = centralizeVariablesModel;
             _client = client;
-            _client.BaseAddress = new Uri("https://connect.instamed.com/");
-            _client.DefaultRequestHeaders.Add("api-key", "fceabac30f1e40758cc8e9bf02567f14");
-            _client.DefaultRequestHeaders.Add("api-secret", "MU9dIPodksnusBM7");
+            _client.BaseAddress = new Uri(_centralizeVariablesModel.Value.InstaMedCredentials.BaseAddress);
+            _client.DefaultRequestHeaders.Add("api-key", _centralizeVariablesModel.Value.InstaMedCredentials.APIkey);
+            _client.DefaultRequestHeaders.Add("api-secret", _centralizeVariablesModel.Value.InstaMedCredentials.APIsecret);
             _client.DefaultRequestHeaders.Accept.Clear();
             _client.DefaultRequestHeaders.Accept.Add(
                 new MediaTypeWithQualityHeaderValue("application/json"));
         }
-
+       
 
         public async Task<string> PostProcessSalesTransactionAsync(SaleRequestModel requestModel)
         {

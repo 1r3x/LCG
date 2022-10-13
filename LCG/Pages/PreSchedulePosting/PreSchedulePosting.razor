@@ -1,15 +1,32 @@
 ﻿@page "/PreSchedulePosting"
 @using EntityModelLibrary.Models;
+@using LCG.Data
+@using EntityModelLibrary.ViewModels
+@using Microsoft.Extensions.Configuration
+@using Microsoft.Extensions.Options
+@inject AuthenticationStateProvider _authenticationStateProvider
+@inject IOptions<CentralizeVariablesModel> _centralizeVariablesModel;
 
+    <div class="progress">
+        <div class="progress-bar bg-success" role="progressbar" style="width: @_progressBarPercentage%" aria-valuenow="@_progressBarPercentage" aria-valuemin="0" aria-valuemax="100">@_processedBar / @_totalBar processed)</div>
+        <div class="progress-bar bg-danger" role="progressbar" style="width: @_unProcessedBarPercentage%" aria-valuenow="@_unProcessedBarPercentage" aria-valuemin="0" aria-valuemax="100">@_unProcessedBar / @_totalBar unprocessed)</div>
+    </div>
+
+
+
+<RadzenButton Icon="check_circle" ButtonStyle="ButtonStyle.Success" Class="m-1" IsBusy=@_busyClick Click=@(() => PostAllCC()) Text="Process All" />
+
+@*<RadzenProgressBar @bind-Value="10" />*@
+<br />
 
 <RadzenDataGrid AllowFiltering="true" AllowPaging="true" PageSize="5" AllowSorting="true"
                 Data="@_paymentSchedule" TItem="LcgPaymentSchedule">
     <Columns>
         @*<RadzenDataGridColumn Width="50px" TItem="LcgPaymentSchedule"
-            Title="#" Filterable="false"
-            Property="Id"
-            Sortable="false" TextAlign="TextAlign.Center">
-            </RadzenDataGridColumn>*@
+        Title="#" Filterable="false"
+        Property="Id"
+        Sortable="false" TextAlign="TextAlign.Center">
+        </RadzenDataGridColumn>*@
 
         <RadzenDataGridColumn TItem="LcgPaymentSchedule" Property="PatientAccount" Title="Patient Account">
 
@@ -17,7 +34,7 @@
         @*<RadzenDataGridColumn TItem="LcgPaymentSchedule" Property="EffectiveDate" Title="Order Date" FormatString="{0:d}" />*@
         @*<RadzenDataGridColumn TItem="LcgPaymentSchedule" Property="CardInfoId" Title="Freight">
 
-            </RadzenDataGridColumn>*@
+        </RadzenDataGridColumn>*@
         <RadzenDataGridColumn TItem="LcgPaymentSchedule" Property="Amount" Title="Amount" />
         <RadzenDataGridColumn Width="240px" TItem="LcgPaymentSchedule" Property="NumberOfPayments" Title="Action">
             <Template Context="data">

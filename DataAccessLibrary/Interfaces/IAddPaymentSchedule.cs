@@ -10,5 +10,6 @@ namespace DataAccessLibrary.Interfaces
     public interface IAddPaymentSchedule
     {
         Task<string> SavePaymentSchedule(LcgPaymentSchedule paymentScheduleObj,int numberOfPayments, string environment);
+        Task<string> InactivePaymentSchedule(int paymentScheduleId, string environment);
     }
 }

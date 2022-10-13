@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Linq.Dynamic.Core;
-using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using ApiAccessLibrary.ApiModels;
 using ApiAccessLibrary.Interfaces;
@@ -8,8 +6,8 @@ using DataAccessLibrary.Interfaces;
 using EntityModelLibrary.Models;
 using LCG.Data;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.EntityFrameworkCore;
-using Radzen;
 
 namespace LCG.Pages.MultiplePayments
 {
@@ -26,9 +24,11 @@ namespace LCG.Pages.MultiplePayments
         [Inject] private IAddPaymentSchedule AddPaymentSchedule { get; set; }
         [Inject] private DbContextForTest DbContext { get; set; }
         [Inject] private DbContextForProdOld DbContextProdOld { get; set; }
+        [Inject] private DbContextForProd DbContextForProd { get; set; }
         [Inject] private IAddCcPayment AddCcPayment { get; set; }
-        
-        private  ViewMultiplePaymentsRequestModel _viewRequestModel = new();
+        [Inject] private IAddPaymentScheduleHistory AddPaymentScheduleHistory { get; set; }
+
+        private ViewMultiplePaymentsRequestModel _viewRequestModel = new();
         private ViewSaleResponseModel _responseModel;
         private int _numberOfPayment = 1;
         private DateTime _scheduleDateTime = DateTime.Now;
@@ -38,22 +38,66 @@ namespace LCG.Pages.MultiplePayments
         private bool _isSubmitting;
         private decimal _debtorAcctTBalance;
 
-        protected override async Task OnInitializedAsync()
+
+        //todo username 
+        private string _username;
+        private async Task ProcessUserNameData()
         {
-            var patientInfo = await PopulateData.GetPatientMasterData(DebtorAcct, "T");
-            var debtorAccountInfoT = await PopulateData.GetDebtorAccountInfoT(DebtorAcct, "T");
-            var userNameMac = Environment.UserName;
-
-            if (patientInfo != null && debtorAccountInfoT != null)
+            var authState = await _authenticationStateProvider.GetAuthenticationStateAsync();
+            var user = authState.User;
+            if (user.Identity != null)
             {
-                _viewRequestModel.Patient.FirstName = patientInfo.FirstName;
-                _viewRequestModel.Patient.LastName = patientInfo.LastName;
-                _viewRequestModel.Patient.AccountNumber = debtorAccountInfoT.SuppliedAcct.TrimStart(new[] { '0' });//for leading zero;
-                _viewRequestModel.Balance = debtorAccountInfoT.Balance;
-                _debtorAcctTBalance = debtorAccountInfoT.Balance;
 
+                if (user.Identity is { IsAuthenticated: true })
+                {
+                    if (user.Identity.Name != null)
+                    {
+                        var username = user.Identity.Name.Split("\\");
+                        _username = username[1].Length > 5
+                            ? username[1][..5] == "admin" ? "31950" : username[1]
+                            : username[1];
+                    }
+                }
+                else
+                {
+                    _username = "LCG";
+                }
             }
         }
+        //todo end
+        protected override async Task OnInitializedAsync()
+        {
+            if (DebtorAcct == null && StateContainer.Property.Length > 0)
+            {
+                DebtorAcct = StateContainer.Property;
+            }
+            await ProcessUserNameData();
+
+            if (DebtorAcct != null)
+            {
+                StateContainer.Property = DebtorAcct;
+                var acctLimitForHBTemp = DebtorAcct.Split('-');
+                var acctLimitForHB = Convert.ToInt64(acctLimitForHBTemp[0] + acctLimitForHBTemp[1]);
+                if (acctLimitForHB >= 4950000001 && acctLimitForHB < 4950999999)
+                {
+                    var patientInfo = await PopulateData.GetPatientMasterData(DebtorAcct, _centralizeVariablesModel.Value.DbEnvironment);
+                    var debtorAccountInfoT = await PopulateData.GetDebtorAccountInfoT(DebtorAcct, _centralizeVariablesModel.Value.DbEnvironment);
+
+                    if (patientInfo != null && debtorAccountInfoT != null)
+                    {
+                        _viewRequestModel.Patient.FirstName = patientInfo.FirstName;
+                        _viewRequestModel.Patient.LastName = patientInfo.LastName;
+                        _viewRequestModel.Patient.AccountNumber = debtorAccountInfoT.SuppliedAcct.TrimStart(new[] { '0' });//for leading zero;
+                        _viewRequestModel.Balance = debtorAccountInfoT.Balance;
+                        _debtorAcctTBalance = debtorAccountInfoT.Balance;
+
+                    }
+                }
+            }
+        }
+
+
+
         private async Task ProcessSaleTrans()
         {
             _responseModel = null;
@@ -65,9 +109,9 @@ namespace LCG.Pages.MultiplePayments
             {
                 Outlet = new ApiAccessLibrary.ApiModels.Outlet()
                 {
-                    MerchantID = "192837645",
-                    StoreID = "0001",
-                    TerminalID = "0001"
+                    MerchantID = _centralizeVariablesModel.Value.Outlet.MerchantID,
+                    StoreID = _centralizeVariablesModel.Value.Outlet.StoreID,
+                    TerminalID = _centralizeVariablesModel.Value.Outlet.TerminalID
                 },
                 Amount = _viewRequestModel.Amount,
                 PaymentMethod = "Card",
@@ -121,7 +165,7 @@ namespace LCG.Pages.MultiplePayments
                                    " AUTH #:" + @_responseModel.AuthorizationNumber;
                 }
                 //actual employee =31950
-                await AddNotes.Notes(DebtorAcct, 31950, "RA", noteText, "N", null, "T");//PO for prod_old & T is for test_db
+                await AddNotes.Notes(DebtorAcct, 31950, "RA", noteText, "N", null, _centralizeVariablesModel.Value.DbEnvironment);//PO for prod_old & T is for test_db
                 _loadingBar = 0;
                 _isSubmitting = false;
 
@@ -146,11 +190,12 @@ namespace LCG.Pages.MultiplePayments
             {
                 Outlet = new ApiAccessLibrary.ApiModels.Outlet()
                 {
-                    MerchantID = "192837645",
-                    StoreID = "0001",
-                    TerminalID = "0001"
+                    MerchantID = _centralizeVariablesModel.Value.Outlet.MerchantID,
+                    StoreID = _centralizeVariablesModel.Value.Outlet.StoreID,
+                    TerminalID = _centralizeVariablesModel.Value.Outlet.TerminalID
                 },
-                Amount = _viewRequestModel.Amount,
+                //Amount = _viewRequestModel.Amount,
+                Amount = 1,
                 PaymentMethod = "Card",
                 Card = new ApiAccessLibrary.ApiModels.Card()
                 {
@@ -180,9 +225,10 @@ namespace LCG.Pages.MultiplePayments
                 }
                 else
                 {
-                    _tempAmount = _viewRequestModel.Amount;
+                    //_tempAmount = _viewRequestModel.Amount;
+                    _tempAmount = 1;
                     _responseModel = new ViewSaleResponseModel(resultVerify);
-                   
+
                 }
 
                 string noteText = null;
@@ -202,7 +248,7 @@ namespace LCG.Pages.MultiplePayments
                                    " AUTH #:" + @_responseModel.AuthorizationNumber;
                 }
 
-                await AddNotes.Notes(DebtorAcct, 31950, "RA", noteText, "N", null, "T");
+                await AddNotes.Notes(DebtorAcct, 31950, "RA", noteText, "N", null, _centralizeVariablesModel.Value.DbEnvironment);
                 _loadingBar = 0;
                 _isSubmitting = false;
             }
@@ -221,9 +267,9 @@ namespace LCG.Pages.MultiplePayments
             {
                 Outlet = new ApiAccessLibrary.ApiModels.Outlet()
                 {
-                    MerchantID = "192837645",
-                    StoreID = "0001",
-                    TerminalID = "0001"
+                    MerchantID = _centralizeVariablesModel.Value.Outlet.MerchantID,
+                    StoreID = _centralizeVariablesModel.Value.Outlet.StoreID,
+                    TerminalID = _centralizeVariablesModel.Value.Outlet.TerminalID
                 },
                 PaymentPlanType = "SaveOnFile",
                 PaymentMethod = "Card",
@@ -258,8 +304,13 @@ namespace LCG.Pages.MultiplePayments
                     AssociateDebtorAcct = DebtorAcct,
                     CardHolderName = _viewRequestModel.Card.CardHolderName
                 };
-                DbContext.LcgCardInfos.Add(cardInfoObj);
-                await DbContext.SaveChangesAsync();
+
+                //DbContext.LcgCardInfos.Add(cardInfoObj);
+                //await DbContext.SaveChangesAsync();
+
+
+                await AddCardInfo.CreateCardInfo(cardInfoObj, _centralizeVariablesModel.Value.DbEnvironment);
+
 
                 var paymentScheduleObj = new LcgPaymentSchedule()
                 {
@@ -272,66 +323,154 @@ namespace LCG.Pages.MultiplePayments
                 };
                 //await AddPaymentSchedule.SavePaymentSchedule(paymentScheduleObj, _numberOfPayment, "T");
                 //experimental
-                var paymentDate = paymentScheduleObj.EffectiveDate;
-                for (var i = 1; i <= _numberOfPayment; i++)
+
+                if (_centralizeVariablesModel.Value.DbEnvironment == "T")
                 {
-                    var noteMaster = new LcgPaymentSchedule()
+                    var paymentDate = paymentScheduleObj.EffectiveDate;
+                    for (var i = 1; i <= _numberOfPayment; i++)
                     {
-                        CardInfoId = paymentScheduleObj.CardInfoId,
-                        EffectiveDate = paymentDate,
-                        IsActive = true,
-                        NumberOfPayments = i,
-                        PatientAccount = paymentScheduleObj.PatientAccount,
-                        Amount = paymentScheduleObj.Amount
-                    };
-                    await DbContext.LcgPaymentSchedules.AddAsync(noteMaster);
-                    
-                    await DbContext.SaveChangesAsync();
-                    if (i == 1)
-                    {
-                        GlobalVariable.LcgPaymentScheduleId = noteMaster.Id;
+                        var lcgPaymentScheduleObj = new LcgPaymentSchedule()
+                        {
+                            CardInfoId = paymentScheduleObj.CardInfoId,
+                            EffectiveDate = paymentDate,
+                            IsActive = true,
+                            NumberOfPayments = i,
+                            PatientAccount = paymentScheduleObj.PatientAccount,
+                            Amount = paymentScheduleObj.Amount
+                        };
+                        await DbContext.LcgPaymentSchedules.AddAsync(lcgPaymentScheduleObj);
+
+                        await DbContext.SaveChangesAsync();
+                        if (i == 1)
+                        {
+                            GlobalVariable.LcgPaymentScheduleId = lcgPaymentScheduleObj.Id;
+                        }
+                        paymentDate = paymentDate.AddMonths(1);
+
                     }
-                    paymentDate = paymentDate.AddMonths(1);
-
                 }
-                
-                
+                else if (_centralizeVariablesModel.Value.DbEnvironment == "PO")
+                {
+                    var paymentDate = paymentScheduleObj.EffectiveDate;
+                    for (var i = 1; i <= _numberOfPayment; i++)
+                    {
+                        var noteMaster = new LcgPaymentSchedule()
+                        {
+                            CardInfoId = paymentScheduleObj.CardInfoId,
+                            EffectiveDate = paymentDate,
+                            IsActive = true,
+                            NumberOfPayments = i,
+                            PatientAccount = paymentScheduleObj.PatientAccount,
+                            Amount = paymentScheduleObj.Amount
+                        };
+                        await DbContextProdOld.LcgPaymentSchedules.AddAsync(noteMaster);
 
-                var paymentScheduleExample = new LcgPaymentScheduleHistory()
+                        await DbContextProdOld.SaveChangesAsync();
+                        if (i == 1)
+                        {
+                            GlobalVariable.LcgPaymentScheduleId = noteMaster.Id;
+                        }
+                        paymentDate = paymentDate.AddMonths(1);
+
+                    }
+                }
+                else if (_centralizeVariablesModel.Value.DbEnvironment == "P")
+                {
+                    var paymentDate = paymentScheduleObj.EffectiveDate;
+                    for (var i = 1; i <= _numberOfPayment; i++)
+                    {
+                        var noteMaster = new LcgPaymentSchedule()
+                        {
+                            CardInfoId = paymentScheduleObj.CardInfoId,
+                            EffectiveDate = paymentDate,
+                            IsActive = true,
+                            NumberOfPayments = i,
+                            PatientAccount = paymentScheduleObj.PatientAccount,
+                            Amount = paymentScheduleObj.Amount
+                        };
+                        await DbContextForProd.LcgPaymentSchedules.AddAsync(noteMaster);
+
+                        await DbContextForProd.SaveChangesAsync();
+                        if (i == 1)
+                        {
+                            GlobalVariable.LcgPaymentScheduleId = noteMaster.Id;
+                        }
+                        paymentDate = paymentDate.AddMonths(1);
+
+                    }
+                }
+                else
+                {
+                    var paymentDate = paymentScheduleObj.EffectiveDate;
+                    for (var i = 1; i <= _numberOfPayment; i++)
+                    {
+                        var noteMaster = new LcgPaymentSchedule()
+                        {
+                            CardInfoId = paymentScheduleObj.CardInfoId,
+                            EffectiveDate = paymentDate,
+                            IsActive = true,
+                            NumberOfPayments = i,
+                            PatientAccount = paymentScheduleObj.PatientAccount,
+                            Amount = paymentScheduleObj.Amount
+                        };
+                        await DbContext.LcgPaymentSchedules.AddAsync(noteMaster);
+
+                        await DbContext.SaveChangesAsync();
+                        if (i == 1)
+                        {
+                            GlobalVariable.LcgPaymentScheduleId = noteMaster.Id;
+                        }
+                        paymentDate = paymentDate.AddMonths(1);
+
+                    }
+                }
+
+
+
+
+                var paymentScheduleHistoryObj = new LcgPaymentScheduleHistory()
                 {
                     ResponseCode = _responseModel.ResponseCode,
                     AuthorizationNumber = _responseModel.AuthorizationNumber,
-                    AuthorizationText = Environment.UserName,
+                    AuthorizationText = _username,
                     ResponseMessage = _responseModel.ResponseMessage,
                     PaymentScheduleId = GlobalVariable.LcgPaymentScheduleId,
                     TransactionId = _responseModel.TransactionId
                 };
 
-                DbContext.LcgPaymentScheduleHistories.Add(paymentScheduleExample);
-                await DbContext.SaveChangesAsync();
+                //DbContext.LcgPaymentScheduleHistories.Add(paymentScheduleExample);
+                //await DbContext.SaveChangesAsync();
 
-                var paymentScheduleUpdate =
-                    DbContext.LcgPaymentSchedules.FirstAsync(x => x.Id == GlobalVariable.LcgPaymentScheduleId);
-                paymentScheduleUpdate.Result.IsActive = false;
-                await DbContext.SaveChangesAsync();
+                //var paymentScheduleUpdate =
+                //    DbContext.LcgPaymentSchedules.FirstAsync(x => x.Id == GlobalVariable.LcgPaymentScheduleId);
+                //paymentScheduleUpdate.Result.IsActive = false;
+                //await DbContext.SaveChangesAsync();
 
-                var ccPaymentObj = new CcPayment()
+                await AddPaymentScheduleHistory.SavePaymentScheduleHistory(paymentScheduleHistoryObj, _centralizeVariablesModel.Value.DbEnvironment);
+                if (_scheduleDateTime.Date == DateTime.Now.Date)
                 {
-                    DebtorAcct = _viewRequestModel.Patient.AccountNumber,
-                    Company = "TOTAL CREDIT RECOVERY",
-                    UserId = Environment.UserName,
-                    UserName = Environment.UserName+" -LCG",
-                    ChargeTotal = _viewRequestModel.Amount,
-                    Subtotal = _viewRequestModel.Amount,
-                    PaymentDate = _scheduleDateTime,
-                    ApprovalStatus = "APPROVED",
-                    BillingName = _viewRequestModel.Card.CardHolderName,
-                    ApprovalCode = _responseModel.ResponseCode,
-                    OrderNumber = _responseModel.TransactionId,
-                    RefNumber = "INSTAMEDLH",
-                    Sif = "N"
-                };
-                await AddCcPayment.CreateCcPayment(ccPaymentObj, "T");
+                    await AddPaymentSchedule.InactivePaymentSchedule(GlobalVariable.LcgPaymentScheduleId,
+                   _centralizeVariablesModel.Value.DbEnvironment);
+
+                    var ccPaymentObj = new CcPayment()
+                    {
+                        DebtorAcct = _viewRequestModel.Patient.AccountNumber,
+                        Company = "TOTAL CREDIT RECOVERY",
+                        UserId = _username,
+                        UserName = _username + " -LCG",
+                        ChargeTotal = _viewRequestModel.Amount,
+                        Subtotal = _viewRequestModel.Amount,
+                        PaymentDate = _scheduleDateTime,
+                        ApprovalStatus = "APPROVED",
+                        BillingName = _viewRequestModel.Card.CardHolderName,
+                        ApprovalCode = _responseModel.ResponseCode,
+                        OrderNumber = _responseModel.TransactionId,
+                        RefNumber = "INSTAMEDLH",
+                        Sif = "N"
+                    };
+                    await AddCcPayment.CreateCcPayment(ccPaymentObj, _centralizeVariablesModel.Value.DbEnvironment);
+                }
+
             }
             catch (Exception)
             {
@@ -381,5 +520,7 @@ namespace LCG.Pages.MultiplePayments
                 _scheduleDateTime = DateTime.Now;
             }
         }
+
+        public void Dispose() => StateContainer.OnChange -= StateHasChanged;
     }
 }

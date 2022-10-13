@@ -1,5 +1,12 @@
 ﻿@page "/multiPayment"
 @page "/multiPayment/{DebtorAcct}"
+@using LCG.Data
+@using EntityModelLibrary.ViewModels
+@using Microsoft.Extensions.Options
+@inject AuthenticationStateProvider _authenticationStateProvider
+@inject IOptions<CentralizeVariablesModel> _centralizeVariablesModel;
+@implements IDisposable
+@inject StateContainer StateContainer
 
 <style>
     .slidecontainer {

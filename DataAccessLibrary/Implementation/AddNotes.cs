@@ -12,10 +12,13 @@ namespace DataAccessLibrary.Implementation
     {
         private readonly DbContextForTest _dbContext;
         private readonly DbContextForProdOld _dbContextProdOld;
-        public AddNotes(DbContextForTest dbContext, DbContextForProdOld dbContextProdOld)
+        private readonly DbContextForProd _dbContextForProd;
+        public AddNotes(DbContextForTest dbContext, DbContextForProdOld dbContextProdOld,
+            DbContextForProd dbContextForProd)
         {
             _dbContext = dbContext;
             _dbContextProdOld = dbContextProdOld;
+            _dbContextForProd = dbContextForProd;
         }
         public async Task<string> Notes(string debtorAcct, int employee, string activityCode, string noteText, string important,
             string actionCode, string environment)
@@ -53,6 +56,22 @@ namespace DataAccessLibrary.Implementation
                     };
                     await _dbContextProdOld.NoteMasters.AddAsync(noteMaster);
                     await _dbContextProdOld.SaveChangesAsync();
+                }
+                else if (environment == "P")
+                {
+                    var datetimeNow = DateTime.Now;
+                    var noteMaster = new NoteMaster()
+                    {
+                        ActionCode = actionCode,
+                        ActivityCode = activityCode,
+                        DebtorAcct = debtorAcct,
+                        Employee = employee,
+                        Important = important,
+                        NoteDate = datetimeNow.AddSeconds(-datetimeNow.Second).AddMilliseconds(-datetimeNow.Millisecond),
+                        NoteText = noteText
+                    };
+                    await _dbContextForProd.NoteMasters.AddAsync(noteMaster);
+                    await _dbContextForProd.SaveChangesAsync();
                 }
                 else
                 {

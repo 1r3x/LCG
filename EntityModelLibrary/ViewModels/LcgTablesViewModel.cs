@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace LCG.ViewModels
+﻿namespace EntityModelLibrary.ViewModels
 {
     public class LcgTablesViewModel
     {

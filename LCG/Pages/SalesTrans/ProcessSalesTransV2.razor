@@ -1,5 +1,13 @@
 ﻿@page "/"
 @page "/{DebtorAcct}"
+@using EntityModelLibrary.ViewModels
+@using LCG.Data
+@using Microsoft.Extensions.Options
+@inject AuthenticationStateProvider _authenticationStateProvider
+@inject IOptions<CentralizeVariablesModel> _centralizeVariablesModel;
+@implements IDisposable
+@inject StateContainer StateContainer
+
 
 
 <EditForm Model="@_viewRequestModel" OnValidSubmit="@ProcessTrans">

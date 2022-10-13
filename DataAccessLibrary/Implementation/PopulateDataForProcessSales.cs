@@ -14,10 +14,13 @@ namespace DataAccessLibrary.Implementation
     {
         private readonly DbContextForTest _dbContext;
         private readonly DbContextForProdOld _dbContextProdOld;
-        public PopulateDataForProcessSales(DbContextForTest dbContext, DbContextForProdOld dbContextProdOld)
+        private readonly DbContextForProd _dbContextForProd;
+        public PopulateDataForProcessSales(DbContextForTest dbContext, DbContextForProdOld dbContextProdOld,
+            DbContextForProd dbContextForProd)
         {
             _dbContext = dbContext;
             _dbContextProdOld = dbContextProdOld;
+            _dbContextForProd = dbContextForProd;
         }
         public async Task<PatientMaster> GetPatientMasterData(string debtorAcct, string environment)
         {
@@ -33,6 +36,15 @@ namespace DataAccessLibrary.Implementation
             else if (environment == "PO")
             {
                 return await _dbContextProdOld.PatientMasters.Where(x => x.DebtorAcct == debtorAcct).Select(i =>
+                    new PatientMaster()
+                    {
+                        FirstName = i.FirstName,
+                        LastName = i.LastName
+                    }).SingleOrDefaultAsync();
+            }
+            else if (environment == "P")
+            {
+                return await _dbContextForProd.PatientMasters.Where(x => x.DebtorAcct == debtorAcct).Select(i =>
                     new PatientMaster()
                     {
                         FirstName = i.FirstName,
@@ -60,12 +72,21 @@ namespace DataAccessLibrary.Implementation
                     new DebtorAcctInfoT()
                     {
                         SuppliedAcct = i.SuppliedAcct,
-                        Balance=i.Balance
+                        Balance = i.Balance
                     }).SingleOrDefaultAsync();
             }
             else if (environment == "PO")
             {
                 return await _dbContextProdOld.DebtorAcctInfoTs.Where(x => x.DebtorAcct == debtorAcct).Select(i =>
+                    new DebtorAcctInfoT()
+                    {
+                        SuppliedAcct = i.SuppliedAcct,
+                        Balance = i.Balance
+                    }).SingleOrDefaultAsync();
+            }
+            else if (environment == "P")
+            {
+                return await _dbContextForProd.DebtorAcctInfoTs.Where(x => x.DebtorAcct == debtorAcct).Select(i =>
                     new DebtorAcctInfoT()
                     {
                         SuppliedAcct = i.SuppliedAcct,
@@ -97,6 +118,14 @@ namespace DataAccessLibrary.Implementation
             else if (environment == "PO")
             {
                 return await _dbContextProdOld.DebtorAcctInfoTs.Where(x => x.SuppliedAcct.TrimStart(new[] { '0' }) == patientAcct).Select(i =>
+                    new DebtorAcctInfoT()
+                    {
+                        DebtorAcct = i.DebtorAcct
+                    }).SingleOrDefaultAsync();
+            }
+            else if (environment == "P")
+            {
+                return await _dbContextForProd.DebtorAcctInfoTs.Where(x => x.SuppliedAcct.TrimStart(new[] { '0' }) == patientAcct).Select(i =>
                     new DebtorAcctInfoT()
                     {
                         DebtorAcct = i.DebtorAcct

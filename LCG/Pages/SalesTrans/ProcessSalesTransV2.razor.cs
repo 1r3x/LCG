@@ -28,17 +28,65 @@ namespace LCG.Pages.SalesTrans
         private decimal _tempAmount;
         private bool _isSubmitting;
 
-        protected override async Task OnInitializedAsync()
+        //todo username 
+        private string _username;
+        private async Task ProcessUserNameData()
         {
-            var patientInfo = await PopulateData.GetPatientMasterData(DebtorAcct, "T");//PO for prod_old & T is for test_db
-            var debtorAccountInfoT = await PopulateData.GetDebtorAccountInfoT(DebtorAcct, "T");//PO for prod_old & T is for test_db
-            if (patientInfo != null && debtorAccountInfoT != null)
+            var authState = await _authenticationStateProvider.GetAuthenticationStateAsync();
+            var user = authState.User;
+            if (user.Identity != null)
             {
-                _viewRequestModel.Patient.FirstName = patientInfo.FirstName;
-                _viewRequestModel.Patient.LastName = patientInfo.LastName;
-                _viewRequestModel.Patient.AccountNumber = debtorAccountInfoT.SuppliedAcct.TrimStart(new[] { '0' });//for leading zero
+
+                if (user.Identity is { IsAuthenticated: true })
+                {
+                    if (user.Identity.Name != null)
+                    {
+                        var username = user.Identity.Name.Split("\\");
+                        _username = username[1].Length > 5
+                            ? username[1][..5] == "admin" ? "31950" : username[1]
+                            : username[1];
+                    }
+                }
+                else
+                {
+                    _username = "LCG";
+                }
             }
         }
+        //todo end
+        protected override async Task OnInitializedAsync()
+        {
+            if (DebtorAcct == null && StateContainer.Property.Length > 0)
+            {
+                DebtorAcct = StateContainer.Property;
+            }
+            StateContainer.OnChange += StateHasChanged;
+            await ProcessUserNameData();
+            if (DebtorAcct != null)
+            {
+                StateContainer.Property = DebtorAcct;
+                var acctLimitForHBTemp = DebtorAcct.Split('-');
+                var acctLimitForHB = Convert.ToInt64(acctLimitForHBTemp[0] + acctLimitForHBTemp[1]);
+                if (acctLimitForHB >= 4950000001 && acctLimitForHB < 4950999999)
+                {
+                    var patientInfo = await PopulateData.GetPatientMasterData(DebtorAcct, _centralizeVariablesModel.Value.DbEnvironment);
+                    var debtorAccountInfoT = await PopulateData.GetDebtorAccountInfoT(DebtorAcct, _centralizeVariablesModel.Value.DbEnvironment);
+
+                    if (patientInfo != null && debtorAccountInfoT != null)
+                    {
+                        _viewRequestModel.Patient.FirstName = patientInfo.FirstName;
+                        _viewRequestModel.Patient.LastName = patientInfo.LastName;
+                        _viewRequestModel.Patient.AccountNumber = debtorAccountInfoT.SuppliedAcct.TrimStart(new[] { '0' });//for leading zero
+                    }
+                }
+            }
+
+
+
+
+        }
+
+
 
         private async Task ProcessTrans()
         {
@@ -47,19 +95,14 @@ namespace LCG.Pages.SalesTrans
             _loadingBar = 0;
             _tempAmount = 0;
             _isSubmitting = true;
-            //checking for admin user
 
-            var username = Environment.UserName.Length > 5
-                ? Environment.UserName[..5] == "admin" ? "31950" : Environment.UserName
-                : Environment.UserName;
-            //
             var saleRequestModel = new SaleRequestModel()
             {
                 Outlet = new ApiAccessLibrary.ApiModels.Outlet()
                 {
-                    MerchantID = "192837645",
-                    StoreID = "0001",
-                    TerminalID = "0001"
+                    MerchantID = _centralizeVariablesModel.Value.Outlet.MerchantID,
+                    StoreID = _centralizeVariablesModel.Value.Outlet.StoreID,
+                    TerminalID = _centralizeVariablesModel.Value.Outlet.TerminalID
                 },
                 Amount = _viewRequestModel.Amount,
                 PaymentMethod = "Card",
@@ -93,11 +136,11 @@ namespace LCG.Pages.SalesTrans
                 {
                     _tempAmount = _viewRequestModel.Amount;
                     _responseModel = new ViewSaleResponseModel(resultVerify);
-                    
+
                 }
 
                 string noteText = null;
-                if (@_responseModel != null && _responseModel.ResponseCode=="000")
+                if (@_responseModel != null && _responseModel.ResponseCode == "000")
                 {
                     noteText = "INSTAMED CC APPROVED FOR $" + _tempAmount + " " + @_responseModel.ResponseMessage.ToUpper() +
                                   " AUTH #:" + @_responseModel.AuthorizationNumber;
@@ -107,21 +150,21 @@ namespace LCG.Pages.SalesTrans
                         DebtorAcct = DebtorAcct,
                         Company = "TOTAL CREDIT RECOVERY",
                         //UserId = username,
-                        UserId = "LCG",
+                        UserId = _username,
                         //UserName = username + " -LCG",
-                        UserName = "LCG",
+                        UserName = _username,
                         ChargeTotal = _viewRequestModel.Amount,
                         Subtotal = _viewRequestModel.Amount,
                         PaymentDate = DateTime.Now,
                         ApprovalStatus = "APPROVED",
                         BillingName = _viewRequestModel.Card.CardHolderName,
                         ApprovalCode = _responseModel.ResponseCode,
-                        OrderNumber =_responseModel.TransactionId,
+                        OrderNumber = _responseModel.TransactionId,
                         RefNumber = "INSTAMEDLH",
                         Sif = "N",
                         VoidSale = "N"
                     };
-                    await AddCcPayment.CreateCcPayment(ccPaymentObj, "T");//PO for prod_old & T is for test_db
+                    await AddCcPayment.CreateCcPayment(ccPaymentObj, _centralizeVariablesModel.Value.DbEnvironment);//PO for prod_old & T is for test_db
                     _viewRequestModel = new ViewSaleRequestModel();
                 }
                 else
@@ -138,9 +181,9 @@ namespace LCG.Pages.SalesTrans
                             DebtorAcct = DebtorAcct,
                             Company = "TOTAL CREDIT RECOVERY",
                             //UserId = username,
-                            UserId = "LCG",
+                            UserId = _username,
                             //UserName = username + " -LCG",
-                            UserName = "LCG",
+                            UserName = _username,
                             ChargeTotal = _viewRequestModel.Amount,
                             Subtotal = _viewRequestModel.Amount,
                             PaymentDate = DateTime.Now,
@@ -152,11 +195,11 @@ namespace LCG.Pages.SalesTrans
                             Sif = "N",
                             VoidSale = "N"
                         };
-                        await AddCcPayment.CreateCcPayment(ccPaymentObj, "T");//PO for prod_old & T is for test_db
+                        await AddCcPayment.CreateCcPayment(ccPaymentObj, _centralizeVariablesModel.Value.DbEnvironment);//PO for prod_old & T is for test_db
                     }
                 }
 
-                await AddNotes.Notes(DebtorAcct, 31950, "RA", noteText, "N", null, "T");//PO for prod_old & T is for test_db
+                await AddNotes.Notes(DebtorAcct, 31950, "RA", noteText, "N", null, _centralizeVariablesModel.Value.DbEnvironment);//PO for prod_old & T is for test_db
                 _loadingBar = 0;
                 _isSubmitting = false;
 
@@ -177,8 +220,8 @@ namespace LCG.Pages.SalesTrans
             var secondHalf = _viewRequestModel.Card.Expiration.Substring(2, 2);
             var newString = firstHalf + "/" + secondHalf;
             _viewRequestModel.Card.Expiration = newString;
-
         }
+        public void Dispose() => StateContainer.OnChange -= StateHasChanged;
 
     }
 }
